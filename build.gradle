@@ -1,0 +1,95 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.8.0'
+}
+
+group 'com.github.philippheuer.credentialmanager'
+description = 'A simple credential manager.'
+version = String.valueOf(System.getenv("CI_COMMIT_REF_NAME")).replace("v", "")
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    // SLF4J API
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.13'
+
+    // Testing
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
+
+    // Getter & Setter
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
+    testCompile group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
+}
+
+/**
+ * Sources - build a jar with source files
+ */
+task sourcesJar(type: Jar, dependsOn: classes, description: 'Builds the sourcesJar.', group: 'build') {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+// build a jar with javadoc
+task javadocJar(type: Jar, dependsOn: javadoc, description: 'Builds the javadocJar.', group: 'build') {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+/**
+ * Artifacts
+ */
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+/**
+ * Deployment
+ */
+publishing {
+    publications {
+        mainProject(MavenPublication) {
+            from project.components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId project.group
+            artifactId project.name
+            version project.version
+        }
+    }
+}
+
+/**
+ * Bintray Upload
+ */
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_API_KEY')
+    publications = ['mainProject']
+    dryRun = false
+    publish = true
+    pkg {
+        // jcenter repository namespace and name
+        userOrg = String.valueOf(System.getenv('CI_PROJECT_NAMESPACE')).toLowerCase()
+        repo = 'maven'
+        name =  String.valueOf(project.name).toLowerCase()
+        desc = project.description
+        licenses = ['MIT']
+        vcsUrl = "https://github.com/PhilippHeuer/credential-manager"
+        labels = []
+        publicDownloadNumbers = true
+        version {
+            name = project.version
+            vcsTag = "v" + project.version
+            released  = new Date()
+        }
+    }
+}
