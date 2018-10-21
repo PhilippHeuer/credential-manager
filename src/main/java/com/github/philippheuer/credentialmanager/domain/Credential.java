@@ -8,6 +8,12 @@ public abstract class Credential {
     /**
      * The identity provider key
      */
-    private String identityProvider;
+    private final String identityProvider;
 
+    /**
+     * Constructor
+     */
+    public Credential(String identityProvider) {
+        this.identityProvider = identityProvider;
+    }
 }

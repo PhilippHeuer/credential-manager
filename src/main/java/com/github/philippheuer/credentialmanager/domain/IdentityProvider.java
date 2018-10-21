@@ -10,12 +10,12 @@ public class IdentityProvider {
     /**
      * Name of the Identity Provider
      */
-    private String name;
+    protected String providerName;
 
     /**
      * Authentication Method (OIDC/...)
      */
-    private String type;
+    protected String providerType;
 
     /**
      * Identity Provider Configuration
