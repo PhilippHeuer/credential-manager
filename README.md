@@ -46,6 +46,45 @@ compile 'com.github.philippheuer.credentialmanager:credentialmanager:0.0.5'
 
 ## Credential Manager
 
+```groovy
+CredentialManager credentialManager = CredentialManagerBuilder.builder()
+    .withStorageBackend(new TemporaryStorageBackend())
+    .build();
+```
+
+## Custom Storage Backends
+
+This is a in-memory storage backend as example, you can use your own as supplied in the builder to store/load the credentials from whereever you want.
+
+```groovy
+public class TemporaryStorageBackend implements IStorageBackend {
+
+    /**
+     * Holds the Credentials
+     */
+    private List<Credential> credentialStorage = new ArrayList<>();
+
+    /**
+     * Load the Credentials
+     *
+     * @return List Credential
+     */
+    public List<Credential> loadCredentials() {
+        return this.credentialStorage;
+    }
+
+    /**
+     * Save the Credentials
+     *
+     * @param credentials List Credential
+     */
+    public void saveCredentials(List<Credential> credentials) {
+        this.credentialStorage = credentials;
+    }
+
+}
+```
+
 ## License
 
 Released under the [MIT License](./LICENSE).
