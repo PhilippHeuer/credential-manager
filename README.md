@@ -23,7 +23,7 @@ and the dependency: (latest, you should use the actual version here)
 <dependency>
     <groupId>com.github.philippheuer.credentialmanager</groupId>
     <artifactId>credentialmanager</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <type>pom</type>
 </dependency>
 ```
@@ -39,7 +39,7 @@ repositories {
 
 and the dependency:
 ```groovy
-compile 'com.github.philippheuer.credentialmanager:credentialmanager:0.0.4'
+compile 'com.github.philippheuer.credentialmanager:credentialmanager:0.0.5'
 ```
 
 # Initialization

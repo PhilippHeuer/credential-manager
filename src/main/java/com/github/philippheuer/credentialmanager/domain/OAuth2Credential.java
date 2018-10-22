@@ -54,7 +54,7 @@ public class OAuth2Credential extends Credential {
      */
     public OAuth2Credential(String identityProvider, String authToken, String userId, String userName, List<String> scopes) {
         super(identityProvider);
-        this.authToken = authToken;
+        this.authToken = authToken.startsWith("oauth:") ? authToken.replace("oauth:", "") : authToken;
         this.userId = userId;
         this.userName = userName;
         this.scopes = scopes;
