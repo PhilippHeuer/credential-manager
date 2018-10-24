@@ -37,7 +37,7 @@ public class CredentialManagerTest {
         CredentialManager credentialManager = CredentialManagerBuilder.builder().build();
 
         // add credential
-        Credential credential = new OAuth2Credential("twitch", "tokenHere");
+        Credential credential = new OAuth2Credential("twitch", "userId", "tokenHere");
         credentialManager.addCredential("twitch", credential);
 
         // asserts

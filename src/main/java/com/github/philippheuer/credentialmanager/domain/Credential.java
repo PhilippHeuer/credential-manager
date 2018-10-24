@@ -11,9 +11,15 @@ public abstract class Credential {
     private final String identityProvider;
 
     /**
+     * Unique User Id
+     */
+    private final String userId;
+
+    /**
      * Constructor
      */
-    public Credential(String identityProvider) {
+    public Credential(String identityProvider, String userId) {
         this.identityProvider = identityProvider;
+        this.userId = userId;
     }
 }

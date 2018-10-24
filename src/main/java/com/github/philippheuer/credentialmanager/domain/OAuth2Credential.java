@@ -38,8 +38,8 @@ public class OAuth2Credential extends Credential {
      * @param identityProvider Identity Provider
      * @param authToken        Authentication Token
      */
-    public OAuth2Credential(String identityProvider, String authToken) {
-        super(identityProvider);
+    public OAuth2Credential(String identityProvider, String userId, String authToken) {
+        super(identityProvider, userId);
         this.authToken = authToken;
     }
 
@@ -47,15 +47,14 @@ public class OAuth2Credential extends Credential {
      * Constructor
      *
      * @param identityProvider Identity Provider
-     * @param authToken        Authentication Token
      * @param userId           User Id
+     * @param authToken        Authentication Token
      * @param userName         User Name
      * @param scopes           Scopes
      */
-    public OAuth2Credential(String identityProvider, String authToken, String userId, String userName, List<String> scopes) {
-        super(identityProvider);
+    public OAuth2Credential(String identityProvider, String userId, String authToken, String userName, List<String> scopes) {
+        super(identityProvider, userId);
         this.authToken = authToken.startsWith("oauth:") ? authToken.replace("oauth:", "") : authToken;
-        this.userId = userId;
         this.userName = userName;
         this.scopes = scopes;
     }

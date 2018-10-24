@@ -23,7 +23,7 @@ and the dependency: (latest, you should use the actual version here)
 <dependency>
     <groupId>com.github.philippheuer.credentialmanager</groupId>
     <artifactId>credentialmanager</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <type>pom</type>
 </dependency>
 ```
@@ -80,6 +80,22 @@ public class TemporaryStorageBackend implements IStorageBackend {
      */
     public void saveCredentials(List<Credential> credentials) {
         this.credentialStorage = credentials;
+    }
+    
+    /**
+     * Gets a credential by user id
+     *
+     * @param userId User Id
+     * @return Credential
+     */
+    public Optional<Credential> getCredentialByUserId(String userId) {
+        for(Credential cred : credentialStorage) {
+            if (cred.getUserId().equalsIgnoreCase(userId)) {
+                return Optional.ofNullable(cred);
+            }
+        }
+
+        return Optional.empty();
     }
 
 }
