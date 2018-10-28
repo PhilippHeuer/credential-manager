@@ -5,6 +5,7 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * OAuth2 Identity Provider
@@ -67,7 +68,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * @param scopes requested scopes
      * @return url
      */
-    public String getAuthenticationUrl(List<String> scopes) {
+    public String getAuthenticationUrl(List<Object> scopes) {
         return getAuthenticationUrl(this.redirectUrl, scopes);
     }
 
@@ -78,8 +79,8 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * @param scopes      requested scopes
      * @return url
      */
-    public String getAuthenticationUrl(String redirectUrl, List<String> scopes) {
-        return String.format("%s?response_type=token&client_id=%s&redirect_uri=%s&scope=%s", authUrl, clientId, redirectUrl, String.join(scopeSeperator, scopes));
+    public String getAuthenticationUrl(String redirectUrl, List<Object> scopes) {
+        return String.format("%s?response_type=token&client_id=%s&redirect_uri=%s&scope=%s", authUrl, clientId, redirectUrl, String.join(scopeSeperator, scopes.stream().map(s -> s.toString()).collect(Collectors.toList())));
     }
 
     /**
