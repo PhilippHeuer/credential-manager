@@ -14,27 +14,32 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     /**
      * OAuth Client Id
      */
-    private String clientId;
+    protected String clientId;
 
     /**
      * OAuth Client Secret
      */
-    private String clientSecret;
+    protected String clientSecret;
 
     /**
      * Auth Endpoint
      */
-    private String authUrl;
+    protected String authUrl;
 
     /**
      * Token Endpoint
      */
-    private String tokenUrl;
+    protected String tokenUrl;
 
     /**
      * Redirect URL
      */
-    private String redirectUrl;
+    protected String redirectUrl;
+
+    /**
+     * Scope Separator
+     */
+    protected String scopeSeperator = " ";
 
     /**
      * Constructor
@@ -74,7 +79,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * @return url
      */
     public String getAuthenticationUrl(String redirectUrl, List<String> scopes) {
-        return String.format("%s?response_type=token&client_id=%s&redirect_uri=%s&scope=%s", authUrl, clientId, redirectUrl, String.join(" ", scopes));
+        return String.format("%s?response_type=token&client_id=%s&redirect_uri=%s&scope=%s", authUrl, clientId, redirectUrl, String.join(scopeSeperator, scopes));
     }
 
     /**

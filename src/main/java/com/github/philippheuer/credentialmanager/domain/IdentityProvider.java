@@ -20,6 +20,6 @@ public class IdentityProvider {
     /**
      * Identity Provider Configuration
      */
-    private Map<String, String> configuration;
+    protected Map<String, String> configuration;
 
 }
