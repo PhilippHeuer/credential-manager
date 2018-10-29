@@ -1,5 +1,6 @@
 package com.github.philippheuer.credentialmanager;
 
+import com.github.philippheuer.credentialmanager.api.IAuthenticationController;
 import com.github.philippheuer.credentialmanager.api.IStorageBackend;
 import com.github.philippheuer.credentialmanager.domain.Credential;
 import com.github.philippheuer.credentialmanager.domain.IdentityProvider;
@@ -26,6 +27,11 @@ public class CredentialManager {
     private final IStorageBackend storageBackend;
 
     /**
+     * Authentication Controller
+     */
+    private final IAuthenticationController authenticationController;
+
+    /**
      * Holds the registered identity providers
      */
     private final List<IdentityProvider> identityProviders = new ArrayList<>();
@@ -40,8 +46,9 @@ public class CredentialManager {
      *
      * @param storageBackend The Storage Backend
      */
-    public CredentialManager(IStorageBackend storageBackend) {
+    public CredentialManager(IStorageBackend storageBackend, IAuthenticationController authenticationController) {
         this.storageBackend = storageBackend;
+        this.authenticationController = authenticationController;
 
         // load credentials
         this.load();

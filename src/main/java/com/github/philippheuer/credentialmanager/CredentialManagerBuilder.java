@@ -1,6 +1,8 @@
 package com.github.philippheuer.credentialmanager;
 
+import com.github.philippheuer.credentialmanager.api.IAuthenticationController;
 import com.github.philippheuer.credentialmanager.api.IStorageBackend;
+import com.github.philippheuer.credentialmanager.authcontroller.DummyAuthController;
 import com.github.philippheuer.credentialmanager.storage.TemporaryStorageBackend;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -23,6 +25,12 @@ public class CredentialManagerBuilder {
     private IStorageBackend storageBackend = new TemporaryStorageBackend();
 
     /**
+     * Authentication Controller
+     */
+    @Wither
+    private IAuthenticationController authenticationController = new DummyAuthController();
+
+    /**
      * Initialize the builder
      *
      * @return CredentialManager Builder
@@ -37,7 +45,7 @@ public class CredentialManagerBuilder {
      * @return CredentialManager
      */
     public CredentialManager build() {
-        CredentialManager credentialManager = new CredentialManager(this.storageBackend);
+        CredentialManager credentialManager = new CredentialManager(this.storageBackend, this.authenticationController);
 
         return credentialManager;
     }
