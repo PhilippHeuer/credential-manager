@@ -1,6 +1,7 @@
 package com.github.philippheuer.credentialmanager.authcontroller;
 
-import com.github.philippheuer.credentialmanager.api.IAuthenticationController;
+import com.github.philippheuer.credentialmanager.CredentialManager;
+import com.github.philippheuer.credentialmanager.domain.AuthenticationController;
 import com.github.philippheuer.credentialmanager.identityprovider.OAuth2IdentityProvider;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,7 +11,16 @@ import java.util.List;
  * Dummy Authentication Controller
  */
 @Slf4j
-public class DummyAuthController implements IAuthenticationController {
+public class DummyAuthController extends AuthenticationController {
+
+    /**
+     * Constructor
+     *
+     * @param credentialManager CredentialManager
+     */
+    public DummyAuthController() {
+
+    }
 
     /**
      * Starts the OAuth2Flow for the specified OAuth2 Identity Provider

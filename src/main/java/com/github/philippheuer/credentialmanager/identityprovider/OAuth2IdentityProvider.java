@@ -1,5 +1,6 @@
 package com.github.philippheuer.credentialmanager.identityprovider;
 
+import com.github.philippheuer.credentialmanager.CredentialManager;
 import com.github.philippheuer.credentialmanager.domain.IdentityProvider;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 

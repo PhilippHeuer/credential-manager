@@ -1,13 +1,25 @@
-package com.github.philippheuer.credentialmanager.api;
+package com.github.philippheuer.credentialmanager.domain;
 
+import com.github.philippheuer.credentialmanager.CredentialManager;
 import com.github.philippheuer.credentialmanager.identityprovider.OAuth2IdentityProvider;
+import lombok.Setter;
 
 import java.util.List;
 
-/**
- * Authentication Controller
- */
-public interface IAuthenticationController {
+public abstract class AuthenticationController {
+
+    /**
+     * Holds the CredentialManager
+     */
+    @Setter
+    CredentialManager credentialManager;
+
+    /**
+     * Constructor
+     */
+    public AuthenticationController() {
+        // nothing
+    }
 
     /**
      * Starts the OAuth2Flow for the specified OAuth2 Identity Provider
@@ -21,6 +33,6 @@ public interface IAuthenticationController {
      * @param redirectUrl Redirect url
      * @param scopes Requested scopes
      */
-    void startOAuth2ImplicitGrantType(OAuth2IdentityProvider oAuth2IdentityProvider, String redirectUrl, List<Object> scopes);
+    public abstract void startOAuth2ImplicitGrantType(OAuth2IdentityProvider oAuth2IdentityProvider, String redirectUrl, List<Object> scopes);
 
 }

@@ -1,8 +1,8 @@
 package com.github.philippheuer.credentialmanager;
 
-import com.github.philippheuer.credentialmanager.api.IAuthenticationController;
 import com.github.philippheuer.credentialmanager.api.IStorageBackend;
 import com.github.philippheuer.credentialmanager.authcontroller.DummyAuthController;
+import com.github.philippheuer.credentialmanager.domain.AuthenticationController;
 import com.github.philippheuer.credentialmanager.storage.TemporaryStorageBackend;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,7 +28,7 @@ public class CredentialManagerBuilder {
      * Authentication Controller
      */
     @Wither
-    private IAuthenticationController authenticationController = new DummyAuthController();
+    private AuthenticationController authenticationController = new DummyAuthController();
 
     /**
      * Initialize the builder

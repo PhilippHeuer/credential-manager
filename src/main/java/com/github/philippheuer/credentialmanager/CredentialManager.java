@@ -1,7 +1,7 @@
 package com.github.philippheuer.credentialmanager;
 
-import com.github.philippheuer.credentialmanager.api.IAuthenticationController;
 import com.github.philippheuer.credentialmanager.api.IStorageBackend;
+import com.github.philippheuer.credentialmanager.domain.AuthenticationController;
 import com.github.philippheuer.credentialmanager.domain.Credential;
 import com.github.philippheuer.credentialmanager.domain.IdentityProvider;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
@@ -29,7 +29,7 @@ public class CredentialManager {
     /**
      * Authentication Controller
      */
-    private final IAuthenticationController authenticationController;
+    private final AuthenticationController authenticationController;
 
     /**
      * Holds the registered identity providers
@@ -46,9 +46,10 @@ public class CredentialManager {
      *
      * @param storageBackend The Storage Backend
      */
-    public CredentialManager(IStorageBackend storageBackend, IAuthenticationController authenticationController) {
+    public CredentialManager(IStorageBackend storageBackend, AuthenticationController authenticationController) {
         this.storageBackend = storageBackend;
         this.authenticationController = authenticationController;
+        authenticationController.setCredentialManager(this);
 
         // load credentials
         this.load();
@@ -63,6 +64,7 @@ public class CredentialManager {
             throw new RuntimeException("Identity Provider " + identityProvider.getProviderName() + " was already registered!");
         }
 
+        identityProvider.setCredentialManager(this);
         this.identityProviders.add(identityProvider);
     }
 
