@@ -2,6 +2,7 @@ package com.github.philippheuer.credentialmanager.domain;
 
 import com.github.philippheuer.credentialmanager.CredentialManager;
 import com.github.philippheuer.credentialmanager.identityprovider.OAuth2IdentityProvider;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public abstract class AuthenticationController {
      * Holds the CredentialManager
      */
     @Setter
+    @Getter
     CredentialManager credentialManager;
 
     /**
