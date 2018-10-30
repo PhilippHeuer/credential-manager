@@ -66,10 +66,11 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * Get Authentication Url
      *
      * @param scopes requested scopes
+     * @param state  state - csrf protection
      * @return url
      */
-    public String getAuthenticationUrl(List<Object> scopes) {
-        return getAuthenticationUrl(this.redirectUrl, scopes);
+    public String getAuthenticationUrl(List<Object> scopes, String state) {
+        return getAuthenticationUrl(this.redirectUrl, scopes, state);
     }
 
     /**
@@ -77,10 +78,11 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      *
      * @param redirectUrl overwrite the redirect url with a custom one
      * @param scopes      requested scopes
+     * @param state       state - csrf protection
      * @return url
      */
-    public String getAuthenticationUrl(String redirectUrl, List<Object> scopes) {
-        return String.format("%s?response_type=token&client_id=%s&redirect_uri=%s&scope=%s", authUrl, clientId, redirectUrl, String.join(scopeSeperator, scopes.stream().map(s -> s.toString()).collect(Collectors.toList())));
+    public String getAuthenticationUrl(String redirectUrl, List<Object> scopes, String state) {
+        return String.format("%s?response_type=token&client_id=%s&redirect_uri=%s&scope=%s&state=%s", authUrl, clientId, redirectUrl, String.join(scopeSeperator, scopes.stream().map(s -> s.toString()).collect(Collectors.toList())), state);
     }
 
     /**
