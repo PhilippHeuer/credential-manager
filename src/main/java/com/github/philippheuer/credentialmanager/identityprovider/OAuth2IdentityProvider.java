@@ -3,7 +3,9 @@ package com.github.philippheuer.credentialmanager.identityprovider;
 import com.github.philippheuer.credentialmanager.CredentialManager;
 import com.github.philippheuer.credentialmanager.domain.IdentityProvider;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
+import lombok.SneakyThrows;
 
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,6 +47,11 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     protected String scopeSeperator = " ";
 
     /**
+     * Response Type
+     */
+    protected String responseType = "token";
+
+    /**
      * Constructor
      *
      * @param providerName Provider Name
@@ -84,11 +91,12 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * @param state       state - csrf protection
      * @return url
      */
+    @SneakyThrows
     public String getAuthenticationUrl(String redirectUrl, List<Object> scopes, String state) {
         if (state == null) {
             state = this.providerName + "|" + UUID.randomUUID();
         }
-        return String.format("%s?response_type=token&client_id=%s&redirect_uri=%s&scope=%s&state=%s", authUrl, clientId, redirectUrl, String.join(scopeSeperator, scopes.stream().map(s -> s.toString()).collect(Collectors.toList())), state);
+        return URLEncoder.encode(String.format("%s?response_type=%s&client_id=%s&redirect_uri=%s&scope=%s&state=%s", authUrl, responseType, clientId, redirectUrl, String.join(scopeSeperator, scopes.stream().map(s -> s.toString()).collect(Collectors.toList())), state), "UTF-8");
     }
 
     /**
