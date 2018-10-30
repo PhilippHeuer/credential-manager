@@ -36,6 +36,7 @@ public class OAuth2Credential extends Credential {
      * Constructor
      *
      * @param identityProvider Identity Provider
+     * @param userId           UserId
      * @param authToken        Authentication Token
      */
     public OAuth2Credential(String identityProvider, String userId, String authToken) {

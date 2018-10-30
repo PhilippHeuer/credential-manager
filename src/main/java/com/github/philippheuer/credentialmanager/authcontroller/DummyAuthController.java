@@ -15,11 +15,9 @@ public class DummyAuthController extends AuthenticationController {
 
     /**
      * Constructor
-     *
-     * @param credentialManager CredentialManager
      */
     public DummyAuthController() {
-
+        // nothing
     }
 
     /**

@@ -48,6 +48,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * Constructor
      *
      * @param providerName Provider Name
+     * @param providerType Provider Type
      * @param clientId     Client ID
      * @param clientSecret Client Secret
      * @param authUrl      Auth URL

@@ -16,7 +16,10 @@ public abstract class Credential {
     private final String userId;
 
     /**
-     * Constructor
+     * Credential
+     *
+     * @param identityProvider Identity Provider
+     * @param userId           User Id
      */
     public Credential(String identityProvider, String userId) {
         this.identityProvider = identityProvider;

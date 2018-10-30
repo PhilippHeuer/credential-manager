@@ -44,7 +44,8 @@ public class CredentialManager {
     /**
      * Creates a new CredentialManager
      *
-     * @param storageBackend The Storage Backend
+     * @param storageBackend           The Storage Backend
+     * @param authenticationController Authentication Controller
      */
     public CredentialManager(IStorageBackend storageBackend, AuthenticationController authenticationController) {
         this.storageBackend = storageBackend;
@@ -57,6 +58,8 @@ public class CredentialManager {
 
     /**
      * Registers a new Identity Provider
+     *
+     * @param identityProvider Identity Provider
      */
     public void registerIdentityProvider(IdentityProvider identityProvider) {
         Boolean exists = this.identityProviders.stream().filter(idp -> idp.getProviderName().equalsIgnoreCase(identityProvider.getProviderName())).count() > 0 ? true : false;
@@ -70,6 +73,9 @@ public class CredentialManager {
 
     /**
      * Adds a Credential
+     *
+     * @param providerName Provider Name
+     * @param credential   Credential
      */
     public void addCredential(String providerName, Credential credential) {
         // OAuth2
@@ -94,6 +100,7 @@ public class CredentialManager {
      * Gets a OAuth2Credential by UserId
      *
      * @param userId User Id
+     * @return OAuth2Credential
      */
     public Optional<OAuth2Credential> getOAuth2CredentialByUserId(String userId) {
         for (Credential entry : this.credentials) {
