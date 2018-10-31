@@ -96,7 +96,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         if (state == null) {
             state = this.providerName + "|" + UUID.randomUUID();
         }
-        return String.format("%s?response_type=%s&client_id=%s&redirect_uri=%s&scope=%s&state=%s", authUrl, URLEncoder.encode(responseType, "UTF-8"), URLEncoder.encode(clientId, "UTF-8"), URLEncoder.encode(redirectUrl, "UTF-8"), URLEncoder.encode(String.join(scopeSeperator, scopes.stream().map(s -> s.toString()).collect(Collectors.toList())), "UTF-8"), URLEncoder.encode(state, "UTF-8"));
+        return String.format("%s?response_type=%s&client_id=%s&redirect_uri=%s&scope=%s&state=%s", authUrl, URLEncoder.encode(responseType, "UTF-8"), URLEncoder.encode(clientId, "UTF-8"), URLEncoder.encode(redirectUrl, "UTF-8"), String.join(scopeSeperator, scopes.stream().map(s -> s.toString()).collect(Collectors.toList())), URLEncoder.encode(state, "UTF-8"));
     }
 
     /**
