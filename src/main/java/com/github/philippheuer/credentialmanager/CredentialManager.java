@@ -62,6 +62,7 @@ public class CredentialManager {
      * @param identityProvider Identity Provider
      */
     public void registerIdentityProvider(IdentityProvider identityProvider) {
+        log.debug("Trying to register IdentityProvider {} [Type: {}", identityProvider.getProviderName(), identityProvider.getProviderType());
         Boolean exists = this.identityProviders.stream().filter(idp -> idp.getProviderName().equalsIgnoreCase(identityProvider.getProviderName())).count() > 0 ? true : false;
         if (exists) {
             throw new RuntimeException("Identity Provider " + identityProvider.getProviderName() + " was already registered!");
@@ -69,6 +70,9 @@ public class CredentialManager {
 
         identityProvider.setCredentialManager(this);
         this.identityProviders.add(identityProvider);
+
+        log.debug("Registered IdentityProvider {} [Type: {}", identityProvider.getProviderName(), identityProvider.getProviderType());
+        log.debug("A total of {} IdentityProviders have been registered!", this.identityProviders.size());
     }
 
     /**
@@ -88,7 +92,7 @@ public class CredentialManager {
      * @return IdentityProvider
      */
     public Optional<OAuth2IdentityProvider> getOAuth2IdentityProviderByName(String identityProviderName) {
-        return this.identityProviders.stream().filter(i -> i.getProviderName().equalsIgnoreCase(identityProviderName) && i instanceof OAuth2IdentityProvider).map(i -> (OAuth2IdentityProvider) i).findFirst();
+        return this.identityProviders.stream().filter(i -> i.getProviderName().equalsIgnoreCase(identityProviderName)).map(i -> (OAuth2IdentityProvider) i).findFirst();
     }
 
     /**
