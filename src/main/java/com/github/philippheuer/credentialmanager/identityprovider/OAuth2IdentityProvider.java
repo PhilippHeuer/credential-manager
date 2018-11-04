@@ -52,6 +52,11 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     protected String responseType = "code";
 
     /**
+     * Token Endpoint Post Type: QUERY or BODY
+     */
+    protected String tokenEndpointPostType = "QUERY";
+
+    /**
      * Constructor
      *
      * @param providerName Provider Name
@@ -108,17 +113,37 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            HttpUrl.Builder urlBuilder = HttpUrl.parse(this.tokenUrl).newBuilder();
-            urlBuilder.addQueryParameter("client_id", this.clientId);
-            urlBuilder.addQueryParameter("client_secret", this.clientSecret);
-            urlBuilder.addQueryParameter("code", code);
-            urlBuilder.addQueryParameter("grant_type", "authorization_code");
-            urlBuilder.addQueryParameter("redirect_uri", this.redirectUrl);
+            Request request;
 
-            Request request = new Request.Builder()
-                    .url(urlBuilder.build().toString())
-                    .post(RequestBody.create(null, new byte[]{}))
-                    .build();
+            if (tokenEndpointPostType.equalsIgnoreCase("QUERY")) {
+                HttpUrl.Builder urlBuilder = HttpUrl.parse(this.tokenUrl).newBuilder();
+                urlBuilder.addQueryParameter("client_id", this.clientId);
+                urlBuilder.addQueryParameter("client_secret", this.clientSecret);
+                urlBuilder.addQueryParameter("code", code);
+                urlBuilder.addQueryParameter("grant_type", "authorization_code");
+                urlBuilder.addQueryParameter("redirect_uri", this.redirectUrl);
+
+                request = new Request.Builder()
+                        .url(urlBuilder.build().toString())
+                        .post(RequestBody.create(null, new byte[]{}))
+                        .build();
+            } else if (tokenEndpointPostType.equalsIgnoreCase("BODY")) {
+                RequestBody requestBody = new MultipartBody.Builder()
+                        .setType(MultipartBody.FORM)
+                        .addFormDataPart("client_id", this.clientId)
+                        .addFormDataPart("client_secret", this.clientSecret)
+                        .addFormDataPart("code", code)
+                        .addFormDataPart("grant_type", "authorization_code")
+                        .addFormDataPart("redirect_uri", this.redirectUrl)
+                        .build();
+
+                request = new Request.Builder()
+                        .url(this.tokenUrl)
+                        .post(requestBody)
+                        .build();
+            } else {
+                throw new UnsupportedOperationException("Unknown tokenEndpointPostType: " + tokenEndpointPostType);
+            }
 
             Response response = client.newCall(request).execute();
             String responseBody = response.body().string();
