@@ -46,6 +46,7 @@ public class CredentialManagerBuilder {
      */
     public CredentialManager build() {
         CredentialManager credentialManager = new CredentialManager(this.storageBackend, this.authenticationController);
+        this.authenticationController.setCredentialManager(credentialManager);
 
         return credentialManager;
     }
