@@ -39,7 +39,7 @@ public class TemporaryStorageBackend implements IStorageBackend {
      * @return Credential
      */
     public Optional<Credential> getCredentialByUserId(String userId) {
-        for(Credential cred : credentialStorage) {
+        for (Credential cred : credentialStorage) {
             if (cred.getUserId().equalsIgnoreCase(userId)) {
                 return Optional.ofNullable(cred);
             }

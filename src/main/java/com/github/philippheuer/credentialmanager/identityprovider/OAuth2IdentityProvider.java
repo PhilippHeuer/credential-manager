@@ -1,14 +1,14 @@
 package com.github.philippheuer.credentialmanager.identityprovider;
 
-import com.github.philippheuer.credentialmanager.CredentialManager;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.philippheuer.credentialmanager.domain.IdentityProvider;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import lombok.SneakyThrows;
+import okhttp3.*;
 
 import java.net.URLEncoder;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -49,7 +49,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     /**
      * Response Type
      */
-    protected String responseType = "token";
+    protected String responseType = "code";
 
     /**
      * Constructor
@@ -100,19 +100,48 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     }
 
     /**
-     * Get Token Information
-     *
-     * @param authToken Auth Token
-     * @return Token Information
+     * Get Access Token
      */
-    abstract public Optional<OAuth2Credential> getTokenInformation(String authToken);
+    public OAuth2Credential getCredentialByCode(String code) {
+        // request access token
+        OkHttpClient client = new OkHttpClient();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            HttpUrl.Builder urlBuilder = HttpUrl.parse(this.tokenUrl).newBuilder();
+            urlBuilder.addQueryParameter("client_id", this.clientId);
+            urlBuilder.addQueryParameter("client_secret", this.clientSecret);
+            urlBuilder.addQueryParameter("code", code);
+            urlBuilder.addQueryParameter("grant_type", "authorization_code");
+            urlBuilder.addQueryParameter("redirect_uri", this.redirectUrl);
+
+            Request request = new Request.Builder()
+                    .url(urlBuilder.build().toString())
+                    .post(RequestBody.create(null, new byte[]{}))
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            String responseBody = response.body().string();
+            if (response.isSuccessful()) {
+                Map<String, Object> resultMap = objectMapper.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
+
+                OAuth2Credential credential = new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
+                return credential;
+            } else {
+                throw new RuntimeException("getCredentialByCode request failed! " + response.code() + ": " + responseBody);
+            }
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     /**
-     * Validate Token
+     * Get Token Information
      *
-     * @param authToken Auth Token
-     * @return true or false
+     * @param credential OAuth2 Credential
+     * @return Token Information
      */
-    abstract public Boolean validateToken(String authToken);
+    abstract public Optional<OAuth2Credential> getAdditionalCredentialInformation(OAuth2Credential credential);
 
 }

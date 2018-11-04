@@ -72,6 +72,26 @@ public class CredentialManager {
     }
 
     /**
+     * Get Identity Provider by Name
+     *
+     * @param identityProviderName Identity Provider Name
+     * @return IdentityProvider
+     */
+    public Optional<IdentityProvider> getIdentityProviderByName(String identityProviderName) {
+        return this.identityProviders.stream().filter(i -> i.getProviderName().equalsIgnoreCase(identityProviderName)).findFirst();
+    }
+
+    /**
+     * Get OAuth2 Identity Provider by Name
+     *
+     * @param identityProviderName Identity Provider Name
+     * @return IdentityProvider
+     */
+    public Optional<OAuth2IdentityProvider> getOAuth2IdentityProviderByName(String identityProviderName) {
+        return this.identityProviders.stream().filter(i -> i.getProviderName().equalsIgnoreCase(identityProviderName) && i instanceof OAuth2IdentityProvider).map(i -> (OAuth2IdentityProvider) i).findFirst();
+    }
+
+    /**
      * Adds a Credential
      *
      * @param providerName Provider Name
@@ -83,13 +103,15 @@ public class CredentialManager {
             OAuth2Credential oAuth2Credential = (OAuth2Credential) credential;
             List<IdentityProvider> oauth2IdentityProviders = this.identityProviders.stream().filter(idp -> idp.getProviderType().equalsIgnoreCase("oauth2") && idp.getProviderName().equalsIgnoreCase(providerName) && idp instanceof OAuth2IdentityProvider).collect(Collectors.toList());
 
-            if (oauth2IdentityProviders.size() >= 1) {
+            if (oauth2IdentityProviders.size() == 1) {
                 OAuth2IdentityProvider oAuth2IdentityProvider = (OAuth2IdentityProvider) oauth2IdentityProviders.get(0);
 
-                Optional<OAuth2Credential> enrichedCredential = oAuth2IdentityProvider.getTokenInformation(oAuth2Credential.getAuthToken());
+                Optional<OAuth2Credential> enrichedCredential = oAuth2IdentityProvider.getAdditionalCredentialInformation(oAuth2Credential);
                 if (enrichedCredential.isPresent()) {
                     credential = enrichedCredential.get();
                 }
+            } else {
+                throw new RuntimeException("Can't find a unique identity provider for the specified credential!");
             }
         }
 
