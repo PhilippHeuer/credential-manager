@@ -7,6 +7,7 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.credentialmanager.util.ProxyHelper;
 import lombok.SneakyThrows;
 import okhttp3.*;
+import org.apache.commons.lang3.exception.ContextedRuntimeException;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -159,10 +160,14 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
             if (response.isSuccessful()) {
                 Map<String, Object> resultMap = objectMapper.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
 
-                OAuth2Credential credential = new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
-                return credential;
+                return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
             } else {
-                throw new RuntimeException("getCredentialByCode request failed! " + response.code() + ": " + responseBody);
+                throw new ContextedRuntimeException("getCredentialByCode request failed!")
+                        .addContextValue("requestUrl", request.url())
+                        .addContextValue("requestHeaders", request.headers())
+                        .addContextValue("requestBody", request.body())
+                        .addContextValue("responseCode", response.code())
+                        .addContextValue("responseBody", responseBody);
             }
 
         } catch (Exception ex) {
@@ -224,7 +229,12 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
 
                 return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
             } else {
-                throw new RuntimeException("getCredentialByUsernameAndPassword request failed! " + response.code() + ": " + responseBody);
+                throw new ContextedRuntimeException("getCredentialByUsernameAndPassword request failed!")
+                        .addContextValue("requestUrl", request.url())
+                        .addContextValue("requestHeaders", request.headers())
+                        .addContextValue("requestBody", request.body())
+                        .addContextValue("responseCode", response.code())
+                        .addContextValue("responseBody", responseBody);
             }
 
         } catch (Exception ex) {
