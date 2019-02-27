@@ -6,25 +6,28 @@ package com.github.philippheuer.credentialmanager.util;
 public class ProxyHelper {
 
     public static String getSystemHttpProxyHost() {
-        return getProxyHostByProperty("http_proxy");
+        return getProxyHostByKey("http_proxy") != null ? getProxyHostByKey("http_proxy") : getProxyHostByKey("HTTP_PROXY");
     }
 
     public static Integer getSystemHttpProxyPort() {
-        return getProxyPortByProperty("http_proxy");
+        return getProxyPortByKey("http_proxy") != null ? getProxyPortByKey("http_proxy") : getProxyPortByKey("HTTP_PROXY");
     }
 
     public static String getSystemHttpsProxyHost() {
-        return getProxyHostByProperty("https_proxy");
+        return getProxyHostByKey("https_proxy") != null ? getProxyHostByKey("https_proxy") : getProxyHostByKey("HTTPS_PROXY");
     }
 
     public static Integer getSystemHttpsProxyPort() {
-        return getProxyPortByProperty("https_proxy");
+        return getProxyPortByKey("https_proxy") != null ? getProxyPortByKey("https_proxy") : getProxyPortByKey("HTTPS_PROXY");
     }
 
-    private static String getProxyHostByProperty(String propertyName) {
-        String httpProxy = System.getProperty("http_proxy", "");
-        String[] proxyInfo = httpProxy.replace("http://", "").replace("https://", "").split(":");
+    private static String getProxyHostByKey(String propertyName) {
+        String httpProxy = System.getenv(propertyName);
+        if (httpProxy == null) {
+            return null;
+        }
 
+        String[] proxyInfo = httpProxy.replace("http://", "").replace("https://", "").split(":");
         if (proxyInfo.length == 2) {
             return proxyInfo[0];
         } else {
@@ -32,10 +35,13 @@ public class ProxyHelper {
         }
     }
 
-    private static Integer getProxyPortByProperty(String propertyName) {
-        String httpProxy = System.getProperty("http_proxy", "");
-        String[] proxyInfo = httpProxy.replace("http://", "").replace("https://", "").split(":");
+    private static Integer getProxyPortByKey(String propertyName) {
+        String httpProxy = System.getenv(propertyName);
+        if (httpProxy == null) {
+            return null;
+        }
 
+        String[] proxyInfo = httpProxy.replace("http://", "").replace("https://", "").split(":");
         if (proxyInfo.length == 2) {
             return Integer.parseInt(proxyInfo[1]);
         } else {
