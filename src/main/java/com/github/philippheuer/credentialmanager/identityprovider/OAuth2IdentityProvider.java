@@ -4,9 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.philippheuer.credentialmanager.domain.IdentityProvider;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
+import com.github.philippheuer.credentialmanager.util.ProxyHelper;
 import lombok.SneakyThrows;
 import okhttp3.*;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -112,6 +115,12 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         OkHttpClient client = new OkHttpClient();
         ObjectMapper objectMapper = new ObjectMapper();
 
+        // use system proxy, if specified
+        if (ProxyHelper.getSystemHttpProxyPort() != null && ProxyHelper.getSystemHttpProxyPort() > 0) {
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ProxyHelper.getSystemHttpProxyHost(), ProxyHelper.getSystemHttpProxyPort()));
+            client = client.newBuilder().proxy(proxy).build();
+        }
+
         try {
             Request request;
 
@@ -168,6 +177,12 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         // request access token
         OkHttpClient client = new OkHttpClient();
         ObjectMapper objectMapper = new ObjectMapper();
+
+        // use system proxy, if specified
+        if (ProxyHelper.getSystemHttpProxyPort() != null && ProxyHelper.getSystemHttpProxyPort() > 0) {
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ProxyHelper.getSystemHttpProxyHost(), ProxyHelper.getSystemHttpProxyPort()));
+            client = client.newBuilder().proxy(proxy).build();
+        }
 
         try {
             Request request;
