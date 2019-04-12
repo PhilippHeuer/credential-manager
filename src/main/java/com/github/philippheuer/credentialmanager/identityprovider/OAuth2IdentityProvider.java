@@ -243,6 +243,75 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     }
 
     /**
+     * Get Access Token
+     */
+    public OAuth2Credential getScopedCredentialByUsernameAndPassword(String username, String password, String scope) {
+        // request access token
+        OkHttpClient client = new OkHttpClient();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // use system proxy, if specified
+        if (ProxyHelper.getSystemHttpProxyPort() != null && ProxyHelper.getSystemHttpProxyPort() > 0) {
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ProxyHelper.getSystemHttpProxyHost(), ProxyHelper.getSystemHttpProxyPort()));
+            client = client.newBuilder().proxy(proxy).build();
+        }
+
+        try {
+            Request request;
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes()));
+
+            if (tokenEndpointPostType.equalsIgnoreCase("QUERY")) {
+                HttpUrl.Builder urlBuilder = HttpUrl.parse(this.tokenUrl).newBuilder();
+                urlBuilder.addQueryParameter("grant_type", "password");
+                urlBuilder.addQueryParameter("username", username);
+                urlBuilder.addQueryParameter("password", password);
+                urlBuilder.addQueryParameter("scope", scope);
+
+                request = new Request.Builder()
+                        .url(urlBuilder.build().toString())
+                        .headers(Headers.of(headers))
+                        .post(RequestBody.create(null, new byte[]{}))
+                        .build();
+            } else if (tokenEndpointPostType.equalsIgnoreCase("BODY")) {
+                HttpUrl.Builder urlBuilder = HttpUrl.parse("http://localhost").newBuilder();
+                urlBuilder.addQueryParameter("grant_type", "password");
+                urlBuilder.addQueryParameter("username", username);
+                urlBuilder.addQueryParameter("password", password);
+                urlBuilder.addQueryParameter("scope", scope);
+                RequestBody requestBody = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded"), urlBuilder.toString().replace("http://localhost/?", "").getBytes());
+
+                request = new Request.Builder()
+                        .url(this.tokenUrl)
+                        .headers(Headers.of(headers))
+                        .post(requestBody)
+                        .build();
+            } else {
+                throw new UnsupportedOperationException("Unknown tokenEndpointPostType: " + tokenEndpointPostType);
+            }
+
+            Response response = client.newCall(request).execute();
+            String responseBody = response.body().string();
+            if (response.isSuccessful()) {
+                Map<String, Object> resultMap = objectMapper.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
+
+                return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
+            } else {
+                throw new ContextedRuntimeException("getScopedCredentialByUsernameAndPassword request failed!")
+                        .addContextValue("requestUrl", request.url())
+                        .addContextValue("requestHeaders", request.headers())
+                        .addContextValue("requestBody", request.body())
+                        .addContextValue("responseCode", response.code())
+                        .addContextValue("responseBody", responseBody);
+            }
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /**
      * Get Token Information
      *
      * @param credential OAuth2 Credential
