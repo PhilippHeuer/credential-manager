@@ -7,7 +7,7 @@ import com.github.philippheuer.credentialmanager.storage.TemporaryStorageBackend
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,13 +21,13 @@ public class CredentialManagerBuilder {
     /**
      * Storage Backend
      */
-    @Wither
+    @With
     private IStorageBackend storageBackend = new TemporaryStorageBackend();
 
     /**
      * Authentication Controller
      */
-    @Wither
+    @With
     private AuthenticationController authenticationController = new DummyAuthController();
 
     /**

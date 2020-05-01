@@ -18,24 +18,26 @@ repositories {
 
 dependencies {
     // SLF4J API
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.13'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 
     // Commons Lang
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
 
     // HTTP Client
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.11.0'
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.6.0'
 
     // Jackson (JSON)
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.7'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
 
     // Testing
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
 
-    // Getter & Setter
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.4'
-    testCompile group: 'org.projectlombok', name: 'lombok', version: '1.18.4'
+    // Lombok
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
 }
 
 /**
