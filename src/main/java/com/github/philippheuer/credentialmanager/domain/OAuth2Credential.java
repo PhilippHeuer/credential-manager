@@ -32,6 +32,12 @@ public class OAuth2Credential extends Credential {
     private String userName;
 
     /**
+     * Token Expiry (in seconds, if complaint with RFC 6749)
+     */
+    @Setter
+    private Integer expiresIn;
+
+    /**
      * OAuth Scopes
      */
     private List<String> scopes;
@@ -80,6 +86,7 @@ public class OAuth2Credential extends Credential {
         this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
         this.refreshToken = refreshToken;
         this.userName = userName;
+        this.expiresIn = expiresIn;
         this.scopes = scopes;
         this.context = new HashMap<>();
     }
@@ -101,6 +108,7 @@ public class OAuth2Credential extends Credential {
         this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
         this.refreshToken = refreshToken;
         this.userName = userName;
+        this.expiresIn = expiresIn;
         this.scopes = scopes;
         this.context = context;
     }
