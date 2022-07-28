@@ -91,6 +91,20 @@ public class CredentialManager {
      * @param identityProviderName Identity Provider Name
      * @return IdentityProvider
      */
+    public <T> Optional<T> getIdentityProviderByName(String identityProviderName, Class<T> identityProviderClass) {
+        return this.identityProviders.stream()
+                .filter(i -> i.getProviderName().equalsIgnoreCase(identityProviderName))
+                .filter(i -> identityProviderClass.isAssignableFrom(i.getClass()))
+                .map(identityProviderClass::cast)
+                .findFirst();
+    }
+
+    /**
+     * Get OAuth2 Identity Provider by Name
+     *
+     * @param identityProviderName Identity Provider Name
+     * @return IdentityProvider
+     */
     public Optional<OAuth2IdentityProvider> getOAuth2IdentityProviderByName(String identityProviderName) {
         return this.identityProviders.stream().filter(i -> i.getProviderName().equalsIgnoreCase(identityProviderName)).map(i -> (OAuth2IdentityProvider) i).findFirst();
     }

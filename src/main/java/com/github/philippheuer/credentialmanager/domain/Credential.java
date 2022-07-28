@@ -13,7 +13,7 @@ public abstract class Credential {
     /**
      * Unique User Id
      */
-    private final String userId;
+    protected String userId;
 
     /**
      * Credential
