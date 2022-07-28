@@ -1,7 +1,9 @@
 package com.github.philippheuer.credentialmanager.domain;
 
 import lombok.*;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +57,6 @@ public class OAuth2Credential extends Credential {
      */
     public OAuth2Credential(String identityProvider, String accessToken) {
         this(identityProvider, accessToken, null, null, null, null, null);
-        this.context = new HashMap<>();
     }
 
     /**
@@ -65,7 +66,7 @@ public class OAuth2Credential extends Credential {
      * @param accessToken      Authentication Token
      * @param context          Credential context
      */
-    public OAuth2Credential(String identityProvider, String accessToken, Map<String, Object> context) {
+    public OAuth2Credential(String identityProvider, String accessToken, @NotNull Map<String, Object> context) {
         this(identityProvider, accessToken, null, null, null, null, null);
         this.context = context;
     }
@@ -87,7 +88,7 @@ public class OAuth2Credential extends Credential {
         this.refreshToken = refreshToken;
         this.userName = userName;
         this.expiresIn = expiresIn;
-        this.scopes = scopes;
+        this.scopes = scopes != null ? scopes : new ArrayList<>(0);
         this.context = new HashMap<>();
     }
 
@@ -109,8 +110,39 @@ public class OAuth2Credential extends Credential {
         this.refreshToken = refreshToken;
         this.userName = userName;
         this.expiresIn = expiresIn;
-        this.scopes = scopes;
-        this.context = context;
+        this.scopes = scopes != null ? scopes : new ArrayList<>(0);
+        this.context = context != null ? context : new HashMap<>(0);
+    }
+
+    /**
+     * Updates the values with the input from the provided new credential
+     *
+     * @param newCredential the OAuth2Credential with additional information
+     */
+    public void updateCredential(OAuth2Credential newCredential) {
+        if (newCredential.accessToken != null) {
+            this.accessToken = newCredential.accessToken;
+        }
+        if (newCredential.refreshToken != null) {
+            this.refreshToken = newCredential.refreshToken;
+        }
+        if (newCredential.expiresIn != null) {
+            this.expiresIn = newCredential.expiresIn;
+        }
+        if (newCredential.userId != null) {
+            this.userId = newCredential.userId;
+        }
+        if (newCredential.userName != null) {
+            this.userName = newCredential.userName;
+        }
+        if (newCredential.scopes != null && !newCredential.scopes.isEmpty()) {
+            this.scopes.clear();
+            this.scopes.addAll(newCredential.scopes);
+        }
+        if (newCredential.context != null && !newCredential.context.isEmpty()) {
+            this.context.clear();
+            this.context.putAll(newCredential.context);
+        }
     }
 
 }
