@@ -6,12 +6,18 @@ import com.github.philippheuer.credentialmanager.domain.Credential;
 import com.github.philippheuer.credentialmanager.domain.IdentityProvider;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.credentialmanager.identityprovider.OAuth2IdentityProvider;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -34,7 +40,8 @@ public class CredentialManager {
     /**
      * Holds the registered identity providers
      */
-    private final List<IdentityProvider> identityProviders = new ArrayList<>();
+    @Getter(AccessLevel.PROTECTED)
+ 	private final Map<String, IdentityProvider> identityProvidersByLowerName = new ConcurrentHashMap<>();
 
     /**
      * In-Memory Credential Storage
@@ -60,19 +67,39 @@ public class CredentialManager {
      * Registers a new Identity Provider
      *
      * @param identityProvider Identity Provider
+     * @throws RuntimeException if there was another provider registered with the same name, but different class representation
      */
     public void registerIdentityProvider(IdentityProvider identityProvider) {
         log.debug("Trying to register IdentityProvider {} [Type: {}]", identityProvider.getProviderName(), identityProvider.getProviderType());
-        Boolean exists = this.identityProviders.stream().filter(idp -> idp.getProviderName().equalsIgnoreCase(identityProvider.getProviderName())).count() > 0 ? true : false;
-        if (exists) {
-            throw new RuntimeException("Identity Provider " + identityProvider.getProviderName() + " was already registered!");
+
+        String lowerName = identityProvider.getProviderName().toLowerCase();
+        IdentityProvider previous = identityProvidersByLowerName.putIfAbsent(lowerName, identityProvider);
+
+        if (previous != null) {
+            String msg = "Identity Provider " + identityProvider.getProviderName() + " was already registered!";
+            if (identityProvider.getClass().isAssignableFrom(previous.getClass())) {
+                // we already have registered an identity provider with this name and (super)class; no need for an exception
+                log.info(msg);
+                return;
+            }
+            if (!previous.getClass().isAssignableFrom(identityProvider.getClass()) || !identityProvidersByLowerName.replace(identityProvider.getProviderName().toLowerCase(), previous, identityProvider)) {
+                // tried to register provider with same name and completely different class hierarchy; throw error
+                throw new RuntimeException(msg);
+            }
         }
 
         identityProvider.setCredentialManager(this);
-        this.identityProviders.add(identityProvider);
-
         log.debug("Registered IdentityProvider {} [Type: {}]", identityProvider.getProviderName(), identityProvider.getProviderType());
-        log.debug("A total of {} IdentityProviders have been registered!", this.identityProviders.size());
+        log.debug("A total of {} IdentityProviders have been registered!", this.identityProvidersByLowerName.size());
+    }
+
+    /**
+     * Get all registered identity providers
+     *
+     * @return a list of all registered identity providers
+     */
+    public List<IdentityProvider> getIdentityProviders() {
+        return Collections.unmodifiableList(new ArrayList<>(identityProvidersByLowerName.values()));
     }
 
     /**
@@ -82,7 +109,7 @@ public class CredentialManager {
      * @return IdentityProvider
      */
     public Optional<IdentityProvider> getIdentityProviderByName(String identityProviderName) {
-        return this.identityProviders.stream().filter(i -> i.getProviderName().equalsIgnoreCase(identityProviderName)).findFirst();
+        return Optional.ofNullable(identityProvidersByLowerName.get(identityProviderName.toLowerCase()));
     }
 
     /**
@@ -92,11 +119,9 @@ public class CredentialManager {
      * @return IdentityProvider
      */
     public <T> Optional<T> getIdentityProviderByName(String identityProviderName, Class<T> identityProviderClass) {
-        return this.identityProviders.stream()
-                .filter(i -> i.getProviderName().equalsIgnoreCase(identityProviderName))
+        return getIdentityProviderByName(identityProviderName)
                 .filter(i -> identityProviderClass.isAssignableFrom(i.getClass()))
-                .map(identityProviderClass::cast)
-                .findFirst();
+                .map(identityProviderClass::cast);
     }
 
     /**
@@ -106,7 +131,7 @@ public class CredentialManager {
      * @return IdentityProvider
      */
     public Optional<OAuth2IdentityProvider> getOAuth2IdentityProviderByName(String identityProviderName) {
-        return this.identityProviders.stream().filter(i -> i.getProviderName().equalsIgnoreCase(identityProviderName)).map(i -> (OAuth2IdentityProvider) i).findFirst();
+        return getIdentityProviderByName(identityProviderName).filter(i -> i instanceof OAuth2IdentityProvider).map(i -> (OAuth2IdentityProvider) i);
     }
 
     /**
@@ -119,17 +144,15 @@ public class CredentialManager {
         // OAuth2
         if (credential instanceof OAuth2Credential) {
             OAuth2Credential oAuth2Credential = (OAuth2Credential) credential;
-            List<IdentityProvider> oauth2IdentityProviders = this.identityProviders.stream().filter(idp -> idp.getProviderType().equalsIgnoreCase("oauth2") && idp.getProviderName().equalsIgnoreCase(providerName) && idp instanceof OAuth2IdentityProvider).collect(Collectors.toList());
 
-            if (oauth2IdentityProviders.size() == 1) {
-                OAuth2IdentityProvider oAuth2IdentityProvider = (OAuth2IdentityProvider) oauth2IdentityProviders.get(0);
+            OAuth2IdentityProvider oAuth2IdentityProvider = getIdentityProviderByName(providerName)
+                .filter(idp -> idp.getProviderType().equalsIgnoreCase("oauth2") && idp instanceof OAuth2IdentityProvider)
+                .map(idp -> (OAuth2IdentityProvider) idp)
+                .orElseThrow(() -> new RuntimeException("Can't find a unique identity provider for the specified credential!"));
 
-                Optional<OAuth2Credential> enrichedCredential = oAuth2IdentityProvider.getAdditionalCredentialInformation(oAuth2Credential);
-                if (enrichedCredential.isPresent()) {
-                    credential = enrichedCredential.get();
-                }
-            } else {
-                throw new RuntimeException("Can't find a unique identity provider for the specified credential!");
+            Optional<OAuth2Credential> enrichedCredential = oAuth2IdentityProvider.getAdditionalCredentialInformation(oAuth2Credential);
+            if (enrichedCredential.isPresent()) {
+                credential = enrichedCredential.get();
             }
         }
 
@@ -142,13 +165,13 @@ public class CredentialManager {
      * @param userId User Id
      * @return OAuth2Credential
      */
-    public Optional<OAuth2Credential> getOAuth2CredentialByUserId(String userId) {
+    public Optional<OAuth2Credential> getOAuth2CredentialByUserId(@NotNull String userId) {
         for (Credential entry : this.credentials) {
             if (entry instanceof OAuth2Credential) {
                 OAuth2Credential credential = (OAuth2Credential) entry;
 
-                if (credential.getUserId().equalsIgnoreCase(userId)) {
-                    return Optional.ofNullable(credential);
+                if (userId.equalsIgnoreCase(credential.getUserId())) {
+                    return Optional.of(credential);
                 }
             }
         }
@@ -159,6 +182,7 @@ public class CredentialManager {
     /**
      * Loads the Credentials from the Storage Backend
      */
+    @Synchronized
     public void load() {
         this.credentials = storageBackend.loadCredentials();
     }
@@ -166,8 +190,8 @@ public class CredentialManager {
     /**
      * Persist the Credentials into the Storage Backend
      */
+    @Synchronized
     public void save() {
         this.storageBackend.saveCredentials(credentials);
     }
-
 }
