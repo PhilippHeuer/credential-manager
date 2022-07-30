@@ -7,6 +7,7 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.credentialmanager.util.ProxyHelper;
 import lombok.SneakyThrows;
 import okhttp3.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 
 import java.net.InetSocketAddress;
@@ -19,6 +20,9 @@ import java.util.stream.Collectors;
  * OAuth2 Identity Provider
  */
 public abstract class OAuth2IdentityProvider extends IdentityProvider {
+    protected static final ObjectMapper OBJECTMAPPER = new ObjectMapper();
+    protected OkHttpClient httpClient = new OkHttpClient();
+
 
     /**
      * OAuth Client Id
@@ -72,6 +76,22 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * @param redirectUrl  Redirect URL
      */
     public OAuth2IdentityProvider(String providerName, String providerType, String clientId, String clientSecret, String authUrl, String tokenUrl, String redirectUrl) {
+        this(providerName, providerType, clientId, clientSecret, authUrl, tokenUrl, redirectUrl, ProxyHelper.selectProxy());
+    }
+
+    /**
+     * Constructor
+     *
+     * @param providerName Provider Name
+     * @param providerType Provider Type
+     * @param clientId     Client ID
+     * @param clientSecret Client Secret
+     * @param authUrl      Auth URL
+     * @param tokenUrl     Token URL
+     * @param redirectUrl  Redirect URL
+     * @param proxy HTTP Proxy
+     */
+    public OAuth2IdentityProvider(String providerName, String providerType, String clientId, String clientSecret, String authUrl, String tokenUrl, String redirectUrl, Proxy proxy) {
         this.providerName = providerName;
         this.providerType = providerType;
         this.clientId = clientId == null ? "" : clientId;
@@ -79,6 +99,10 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         this.authUrl = authUrl;
         this.tokenUrl = tokenUrl;
         this.redirectUrl = redirectUrl;
+
+        if (proxy != null) {
+            httpClient = httpClient.newBuilder().proxy(proxy).build();
+        }
     }
 
     /**
@@ -112,16 +136,6 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * Get Access Token
      */
     public OAuth2Credential getCredentialByCode(String code) {
-        // request access token
-        OkHttpClient client = new OkHttpClient();
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        // use system proxy, if specified
-        if (ProxyHelper.getSystemHttpProxyPort() != null && ProxyHelper.getSystemHttpProxyPort() > 0) {
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ProxyHelper.getSystemHttpProxyHost(), ProxyHelper.getSystemHttpProxyPort()));
-            client = client.newBuilder().proxy(proxy).build();
-        }
-
         try {
             Request request;
 
@@ -155,10 +169,10 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
                 throw new UnsupportedOperationException("Unknown tokenEndpointPostType: " + tokenEndpointPostType);
             }
 
-            Response response = client.newCall(request).execute();
+            Response response = httpClient.newCall(request).execute();
             String responseBody = response.body().string();
             if (response.isSuccessful()) {
-                Map<String, Object> resultMap = objectMapper.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
+                Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
 
                 return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
             } else {
@@ -179,16 +193,6 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * Get Access Token
      */
     public OAuth2Credential getCredentialByUsernameAndPassword(String username, String password) {
-        // request access token
-        OkHttpClient client = new OkHttpClient();
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        // use system proxy, if specified
-        if (ProxyHelper.getSystemHttpProxyPort() != null && ProxyHelper.getSystemHttpProxyPort() > 0) {
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ProxyHelper.getSystemHttpProxyHost(), ProxyHelper.getSystemHttpProxyPort()));
-            client = client.newBuilder().proxy(proxy).build();
-        }
-
         try {
             Request request;
 
@@ -222,10 +226,10 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
                 throw new UnsupportedOperationException("Unknown tokenEndpointPostType: " + tokenEndpointPostType);
             }
 
-            Response response = client.newCall(request).execute();
+            Response response = httpClient.newCall(request).execute();
             String responseBody = response.body().string();
             if (response.isSuccessful()) {
-                Map<String, Object> resultMap = objectMapper.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
+                Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
 
                 return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
             } else {
@@ -246,16 +250,6 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * Get Access Token
      */
     public OAuth2Credential getScopedCredentialByUsernameAndPassword(String username, String password, String scope) {
-        // request access token
-        OkHttpClient client = new OkHttpClient();
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        // use system proxy, if specified
-        if (ProxyHelper.getSystemHttpProxyPort() != null && ProxyHelper.getSystemHttpProxyPort() > 0) {
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ProxyHelper.getSystemHttpProxyHost(), ProxyHelper.getSystemHttpProxyPort()));
-            client = client.newBuilder().proxy(proxy).build();
-        }
-
         try {
             Request request;
 
@@ -291,10 +285,10 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
                 throw new UnsupportedOperationException("Unknown tokenEndpointPostType: " + tokenEndpointPostType);
             }
 
-            Response response = client.newCall(request).execute();
+            Response response = httpClient.newCall(request).execute();
             String responseBody = response.body().string();
             if (response.isSuccessful()) {
-                Map<String, Object> resultMap = objectMapper.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
+                Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
 
                 return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
             } else {
@@ -385,10 +379,6 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * @throws RuntimeException If the response is unsuccessful
      */
     public OAuth2Credential getAppAccessToken() {
-        // request access token
-        OkHttpClient client = new OkHttpClient();
-        ObjectMapper objectMapper = new ObjectMapper();
-        
         try {
             Request request;
             
@@ -418,13 +408,12 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
                 throw new UnsupportedOperationException("Unknown tokenEndpointPostType: " + tokenEndpointPostType);
             }
             
-            Response response = client.newCall(request).execute();
+            Response response = httpClient.newCall(request).execute();
             String responseBody = response.body().string();
             if (response.isSuccessful()) {
-                Map<String, Object> resultMap = objectMapper.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
-                
-                OAuth2Credential credential = new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
-                return credential;
+                Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
+
+                return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
             } else {
                 throw new RuntimeException("getCredentialByClientCredentials request failed! " + response.code() + ": " + responseBody);
             }

@@ -1,9 +1,35 @@
 package com.github.philippheuer.credentialmanager.util;
 
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+
 /**
  * Tries to use the system proxy like any other normal sane app ...
  */
 public class ProxyHelper {
+
+    /**
+     * automatically detects the proxy from env variables
+     *
+     * @return the https proxy (env), http proxy (env) or null in this order
+     */
+    @Nullable
+    public static Proxy selectProxy() {
+        // HTTPS
+        if (!StringUtils.isEmpty(ProxyHelper.getSystemHttpsProxyHost()) && ProxyHelper.getSystemHttpsProxyPort() > 0) {
+            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ProxyHelper.getSystemHttpsProxyHost(), ProxyHelper.getSystemHttpsProxyPort()));
+        }
+
+        // HTTP
+        if (!StringUtils.isEmpty(ProxyHelper.getSystemHttpProxyHost()) && ProxyHelper.getSystemHttpProxyPort() > 0) {
+            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ProxyHelper.getSystemHttpProxyHost(), ProxyHelper.getSystemHttpProxyPort()));
+        }
+
+        return null;
+    }
 
     public static String getSystemHttpProxyHost() {
         return getProxyHostByKey("http_proxy") != null ? getProxyHostByKey("http_proxy") : getProxyHostByKey("HTTP_PROXY");
