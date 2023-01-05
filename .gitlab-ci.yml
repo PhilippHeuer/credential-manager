@@ -3,7 +3,7 @@
 ####
 
 # Image
-image: openjdk:8-jdk-alpine
+image: openjdk:17-jdk-alpine
 
 # Before Script
 before_script:
