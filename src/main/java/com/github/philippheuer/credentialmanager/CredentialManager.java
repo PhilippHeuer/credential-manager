@@ -47,7 +47,7 @@ public class CredentialManager {
     /**
      * In-Memory Credential Storage
      */
-    private Collection<Credential> credentials;
+    private List<Credential> credentials;
 
     /**
      * Creates a new CredentialManager

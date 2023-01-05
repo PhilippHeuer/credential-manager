@@ -5,6 +5,7 @@ import com.github.philippheuer.credentialmanager.domain.Credential;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public class TemporaryStorageBackend implements IStorageBackend {
@@ -12,14 +13,14 @@ public class TemporaryStorageBackend implements IStorageBackend {
     /**
      * Holds the Credentials
      */
-    private Collection<Credential> credentialStorage = new ArrayList<>();
+    private List<Credential> credentialStorage = new ArrayList<>();
 
     /**
      * Load the Credentials
      *
      * @return List Credential
      */
-    public Collection<Credential> loadCredentials() {
+    public List<Credential> loadCredentials() {
         return this.credentialStorage;
     }
 
@@ -28,7 +29,7 @@ public class TemporaryStorageBackend implements IStorageBackend {
      *
      * @param credentials List Credential
      */
-    public void saveCredentials(Collection<Credential> credentials) {
+    public void saveCredentials(List<Credential> credentials) {
         this.credentialStorage = credentials;
     }
 
