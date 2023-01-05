@@ -2,6 +2,7 @@ package com.github.philippheuer.credentialmanager.api;
 
 import com.github.philippheuer.credentialmanager.domain.Credential;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 

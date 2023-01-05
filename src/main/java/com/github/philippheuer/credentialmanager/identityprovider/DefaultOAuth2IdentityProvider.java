@@ -53,5 +53,4 @@ public class DefaultOAuth2IdentityProvider extends OAuth2IdentityProvider {
     public Optional<OAuth2Credential> getAdditionalCredentialInformation(OAuth2Credential credential) {
         return Optional.empty();
     }
-
 }

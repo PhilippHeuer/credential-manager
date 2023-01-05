@@ -3,6 +3,7 @@ package com.github.philippheuer.credentialmanager.domain;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,12 @@ public class OAuth2Credential extends Credential {
     private Map<String, Object> context;
 
     /**
+     * Token Received Date
+     */
+    @Setter
+    private Instant receivedAt;
+
+    /**
      * Constructor
      *
      * @param identityProvider Identity Provider
@@ -90,6 +97,7 @@ public class OAuth2Credential extends Credential {
         this.expiresIn = expiresIn;
         this.scopes = scopes != null ? scopes : new ArrayList<>(0);
         this.context = new HashMap<>();
+        this.receivedAt = Instant.now();
     }
 
     /**
@@ -112,6 +120,7 @@ public class OAuth2Credential extends Credential {
         this.expiresIn = expiresIn;
         this.scopes = scopes != null ? scopes : new ArrayList<>(0);
         this.context = context != null ? context : new HashMap<>(0);
+        this.receivedAt = Instant.now();
     }
 
     /**
@@ -143,6 +152,8 @@ public class OAuth2Credential extends Credential {
             this.context.clear();
             this.context.putAll(newCredential.context);
         }
+        if (newCredential.receivedAt != null) {
+            this.receivedAt = newCredential.receivedAt;
+        }
     }
-
 }
