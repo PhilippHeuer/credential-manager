@@ -6,41 +6,9 @@ A simple OAuth Client & CredentialManager Library, that supports multiple storag
 
 # Import
 
-Maven:
-
-Add the repository to your pom.xml with:
-```xml
-<repositories>
-    <repository>
-      <id>jcenter</id>
-      <url>https://jcenter.bintray.com/</url>
-    </repository>
-</repositories>
-```
-and the dependency: (latest, you should use the actual version here)
-
-```xml
-<dependency>
-    <groupId>com.github.philippheuer.credentialmanager</groupId>
-    <artifactId>credentialmanager</artifactId>
-    <version>0.0.6</version>
-    <type>pom</type>
-</dependency>
-```
-
-Gradle:
-
-Add the repository to your build.gradle with:
-```groovy
-repositories {
-	jcenter()
-}
-```
-
-and the dependency:
-```groovy
-compile 'com.github.philippheuer.credentialmanager:credentialmanager:0.0.5'
-```
+| Module                                                                                                                                                                                                                              | Javadoc                                                                                                                                                                                                           |
+|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [![Lib](https://img.shields.io/maven-central/v/com.github.philippheuer.credentialmanager/credentialmanager?label=credentialmanager)](https://search.maven.org/artifact/com.github.philippheuer.credentialmanager/credentialmanager) | [![Javadoc](https://javadoc.io/badge2/com.github.philippheuer.credentialmanager/credentialmanager/javadoc.svg?label=javadoc)](https://javadoc.io/doc/com.github.philippheuer.credentialmanager/credentialmanager) |
 
 # Initialization
 
@@ -54,7 +22,7 @@ CredentialManager credentialManager = CredentialManagerBuilder.builder()
 
 ## Custom Storage Backends
 
-This is a in-memory storage backend as example, you can use your own as supplied in the builder to store/load the credentials from whereever you want.
+This is an in-memory storage backend as an example. You can provide your own storage backend by supplying it in the builder to store/load the credentials from wherever you want.
 
 ```groovy
 public class TemporaryStorageBackend implements IStorageBackend {
