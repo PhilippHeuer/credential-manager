@@ -9,6 +9,7 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.credentialmanager.util.ProxyHelper;
 import lombok.SneakyThrows;
 import okhttp3.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 
 import java.net.Proxy;
@@ -365,14 +366,11 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
                 throw new RuntimeException("refreshCredential request failed! " + response.code() + ": " + responseBody);
             }
             
-        } catch (Exception ex) {
-        
-        }
-        
+        } catch (Exception ignored) {}
+
         return Optional.empty();
     }
-    
-    
+
     /**
      * Get a Credential for server-to-server requests using the OAuth2 Client Credentials Flow.
      *
@@ -381,45 +379,63 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * @throws RuntimeException If the response is unsuccessful
      */
     public OAuth2Credential getAppAccessToken() {
+        return getAppAccessToken(null);
+    }
+
+    /**
+     * Get a Credential for server-to-server requests using the OAuth2 Client Credentials Flow.
+     *
+     * @param scope requested scopes
+     * @return The refreshed credential
+     * @throws UnsupportedOperationException If the token endpoint type is not "QUERY" or "BODY"
+     * @throws RuntimeException If the response is unsuccessful
+     */
+    public OAuth2Credential getAppAccessToken(String scope) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("client_id", this.clientId);
+        parameters.put("client_secret", this.clientId);
+        parameters.put("grant_type", "client_credentials");
+        if (StringUtils.isNotBlank(scope)) {
+            parameters.put("scope", scope);
+        }
+
         try {
             Request request;
-            
-            if (tokenEndpointPostType.equalsIgnoreCase("QUERY")) {
-                HttpUrl.Builder urlBuilder = HttpUrl.parse(this.tokenUrl).newBuilder();
-                urlBuilder.addQueryParameter("client_id", this.clientId);
-                urlBuilder.addQueryParameter("client_secret", this.clientSecret);
-                urlBuilder.addQueryParameter("grant_type", "client_credentials");
-                
-                request = new Request.Builder()
-                        .url(urlBuilder.build().toString())
-                        .post(RequestBody.create(null, new byte[]{}))
-                        .build();
-            } else if (tokenEndpointPostType.equalsIgnoreCase("BODY")) {
-                RequestBody requestBody = new MultipartBody.Builder()
-                        .setType(MultipartBody.FORM)
-                        .addFormDataPart("client_id", this.clientId)
-                        .addFormDataPart("client_secret", this.clientSecret)
-                        .addFormDataPart("grant_type", "client_credentials")
-                        .build();
-                
-                request = new Request.Builder()
-                        .url(this.tokenUrl)
-                        .post(requestBody)
-                        .build();
-            } else {
-                throw new UnsupportedOperationException("Unknown tokenEndpointPostType: " + tokenEndpointPostType);
-            }
-            
-            Response response = httpClient.newCall(request).execute();
-            String responseBody = response.body().string();
-            if (response.isSuccessful()) {
-                Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
 
-                return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
-            } else {
-                throw new RuntimeException("getCredentialByClientCredentials request failed! " + response.code() + ": " + responseBody);
+            switch (tokenEndpointPostType.toUpperCase()) {
+                case "QUERY":
+                    HttpUrl.Builder urlBuilder = HttpUrl.parse(this.tokenUrl).newBuilder();
+                    parameters.forEach(urlBuilder::addQueryParameter);
+
+                    request = new Request.Builder()
+                            .url(urlBuilder.build().toString())
+                            .post(RequestBody.create(new byte[]{}, null))
+                            .build();
+                    break;
+                case "BODY":
+                    okhttp3.MultipartBody.Builder requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
+                    parameters.forEach(requestBody::addFormDataPart);
+
+                    request = new Request.Builder()
+                            .url(this.tokenUrl)
+                            .post(requestBody.build())
+                            .build();
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown tokenEndpointPostType: " + tokenEndpointPostType);
             }
-            
+
+            try (Response response = httpClient.newCall(request).execute()) {
+                String responseBody = response.body().string();
+                if (response.isSuccessful()) {
+                    Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
+
+                    return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
+                } else {
+                    throw new RuntimeException("getCredentialByClientCredentials request failed! " + response.code() + ": " + responseBody);
+                }
+            }
+
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
