@@ -10,6 +10,8 @@ projectConfiguration {
     javaVersion.set(JavaVersion.VERSION_1_8)
     artifactGroupId.set("com.github.philippheuer.credentialmanager")
     artifactId.set("credentialmanager")
+    artifactDisplayName.set("credentialmanager")
+    artifactDescription.set("A simple credential manager.")
 
     pom = { pom ->
         pom.url.set("https://github.com/PhilippHeuer/credential-manager")
