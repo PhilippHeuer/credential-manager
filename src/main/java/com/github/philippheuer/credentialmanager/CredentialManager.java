@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class CredentialManager {
     /**
      * In-Memory Credential Storage
      */
-    private List<Credential> credentials;
+    private Collection<Credential> credentials;
 
     /**
      * Creates a new CredentialManager

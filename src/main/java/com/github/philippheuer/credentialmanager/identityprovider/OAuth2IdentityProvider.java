@@ -2,23 +2,25 @@ package com.github.philippheuer.credentialmanager.identityprovider;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import com.github.philippheuer.credentialmanager.domain.Credential;
 import com.github.philippheuer.credentialmanager.domain.IdentityProvider;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.credentialmanager.util.ProxyHelper;
 import lombok.SneakyThrows;
 import okhttp3.*;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 
-import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URLEncoder;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * OAuth2 Identity Provider
  */
+@Slf4j
 public abstract class OAuth2IdentityProvider extends IdentityProvider {
     protected static final ObjectMapper OBJECTMAPPER = new ObjectMapper();
     protected OkHttpClient httpClient = new OkHttpClient();
@@ -431,4 +433,27 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      */
     abstract public Optional<OAuth2Credential> getAdditionalCredentialInformation(OAuth2Credential credential);
 
+    @Override
+    public boolean isValid(Credential credential) {
+        if (credential instanceof OAuth2Credential) {
+            OAuth2Credential oauthCred = (OAuth2Credential) credential;
+            return oauthCred.getReceivedAt().plusSeconds(oauthCred.getExpiresIn()).compareTo(Instant.now()) > 0;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean renew(Credential credential) {
+        if (credential instanceof OAuth2Credential) {
+            OAuth2Credential oauthCred = (OAuth2Credential) credential;
+            Optional<OAuth2Credential> updatedCredential = refreshCredential(oauthCred);
+            if (updatedCredential.isPresent()) {
+                oauthCred.updateCredential(updatedCredential.get());
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

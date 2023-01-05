@@ -2,7 +2,7 @@ package com.github.philippheuer.credentialmanager.api;
 
 import com.github.philippheuer.credentialmanager.domain.Credential;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -15,14 +15,14 @@ public interface IStorageBackend {
      *
      * @return List Credential
      */
-    List<Credential> loadCredentials();
+    Collection<Credential> loadCredentials();
 
     /**
      * Save the Credentials
      *
      * @param credentials List Credential
      */
-    void saveCredentials(List<Credential> credentials);
+    void saveCredentials(Collection<Credential> credentials);
 
     /**
      * Gets a Credential by UserId
