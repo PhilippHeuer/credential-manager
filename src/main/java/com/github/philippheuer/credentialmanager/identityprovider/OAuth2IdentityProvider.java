@@ -8,14 +8,27 @@ import com.github.philippheuer.credentialmanager.domain.IdentityProvider;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.credentialmanager.util.ProxyHelper;
 import lombok.SneakyThrows;
-import okhttp3.*;
+import okhttp3.FormBody;
+import okhttp3.Headers;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 
 import java.net.Proxy;
 import java.net.URLEncoder;
 import java.time.Instant;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -106,6 +119,15 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         if (proxy != null) {
             httpClient = httpClient.newBuilder().proxy(proxy).build();
         }
+    }
+
+    /**
+     * enables a logging interceptor to investigate issues
+     */
+    public void enableLoggingInterceptor() {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        httpClient = httpClient.newBuilder().addInterceptor(logging).build();
     }
 
     /**
@@ -226,7 +248,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     public Optional<OAuth2Credential> refreshCredential(OAuth2Credential oldCredential) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("client_id", this.clientId);
-        parameters.put("client_secret", this.clientId);
+        parameters.put("client_secret", this.clientSecret);
         parameters.put("grant_type", "refresh_token");
         parameters.put("refresh_token", oldCredential.getRefreshToken());
 
@@ -273,7 +295,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     public OAuth2Credential getAppAccessToken(String scope) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("client_id", this.clientId);
-        parameters.put("client_secret", this.clientId);
+        parameters.put("client_secret", this.clientSecret);
         parameters.put("grant_type", "client_credentials");
         if (StringUtils.isNotBlank(scope)) {
             parameters.put("scope", scope);
@@ -320,8 +342,8 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
                         .build();
                 break;
             case "BODY":
-                okhttp3.MultipartBody.Builder requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
-                parameters.forEach(requestBody::addFormDataPart);
+                FormBody.Builder requestBody = new FormBody.Builder();
+                parameters.forEach(requestBody::add);
 
                 request = new Request.Builder()
                         .url(this.tokenUrl)
