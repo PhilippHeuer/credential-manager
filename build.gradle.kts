@@ -45,7 +45,7 @@ projectConfiguration {
 
 dependencies {
     // Jackson (JSON)
-    api("com.fasterxml.jackson.core:jackson-databind:2.14.2")
+    api("com.fasterxml.jackson.core:jackson-databind:2.15.0")
 
     // Logging
     api("org.slf4j:slf4j-api:2.0.7")
