@@ -51,7 +51,7 @@ dependencies {
     api("org.slf4j:slf4j-api:2.0.7")
 
     // Commons Lang
-    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("org.apache.commons:commons-lang3:3.13.0")
 
     // HTTP Client
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
