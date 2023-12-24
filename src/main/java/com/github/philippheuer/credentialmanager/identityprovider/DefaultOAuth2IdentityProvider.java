@@ -39,7 +39,25 @@ public class DefaultOAuth2IdentityProvider extends OAuth2IdentityProvider {
      * @param proxy Proxy for HTTP Requests
      */
     public DefaultOAuth2IdentityProvider(String providerName, String providerType, String clientId, String clientSecret, String authUrl, String tokenUrl, String redirectUrl, String tokenEndpointPostType, Proxy proxy) {
-        super(providerName, providerType, clientId, clientSecret, authUrl, tokenUrl, redirectUrl, proxy);
+        this(providerName, providerType, clientId, clientSecret, authUrl, tokenUrl, null, redirectUrl, tokenEndpointPostType, proxy);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param providerName          Provider Name
+     * @param providerType          Provider Type
+     * @param clientId              Client ID
+     * @param clientSecret          Client Secret
+     * @param authUrl               Auth URL
+     * @param tokenUrl              Token URL
+     * @param deviceUrl             Device Flow URL
+     * @param redirectUrl           Redirect URL
+     * @param tokenEndpointPostType Token Endpoint Post Type
+     * @param proxy                 Proxy for HTTP Requests
+     */
+    public DefaultOAuth2IdentityProvider(String providerName, String providerType, String clientId, String clientSecret, String authUrl, String tokenUrl, String deviceUrl, String redirectUrl, String tokenEndpointPostType, Proxy proxy) {
+        super(providerName, providerType, clientId, clientSecret, authUrl, tokenUrl, deviceUrl, redirectUrl, proxy);
 
         this.tokenEndpointPostType = tokenEndpointPostType != null ? tokenEndpointPostType : this.tokenEndpointPostType;
     }
