@@ -85,6 +85,7 @@ public final class DeviceFlowController extends AuthenticationController impleme
                     if (credential != null && credentialManager != null) {
                         credentialManager.addCredential(identityProvider.getProviderName(), credential);
                     }
+                    return;
                 } else {
                     log.debug("Received {} error from device token endpoint for user {}; will retry...", response.getError(), userCode);
                     if (response.getError() == DeviceFlowError.SLOW_DOWN) {
