@@ -1,5 +1,7 @@
 package com.github.philippheuer.credentialmanager.domain;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AccessLevel;
@@ -11,6 +13,9 @@ import lombok.Setter;
 import okhttp3.HttpUrl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The response from the device authorization request.
@@ -61,6 +66,13 @@ public class DeviceAuthorization {
     @Nullable
     @Getter(AccessLevel.PROTECTED) // avoid confusion with #getCompleteUri
     private String verificationUriComplete;
+
+    /**
+     * Contains any non-standardized properties in the initial device authorization response.
+     */
+    @JsonAnyGetter
+    @JsonAnySetter
+    private Map<String, Object> customProperties = new HashMap<>(0);
 
     /**
      * @return the verification uri with the populated user_code query parameter.

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DeviceAuthorizationTest {
 
@@ -31,6 +32,17 @@ class DeviceAuthorizationTest {
         assertEquals(5, resp.getInterval());
         assertEquals("https://www.twitch.tv/activate?device-code=ABCDEFGH", resp.getVerificationUri());
         assertEquals("https://www.twitch.tv/activate?device-code=ABCDEFGH&user_code=ABCDEFGH", resp.getCompleteUri());
+        assertTrue(resp.getCustomProperties().isEmpty());
+    }
+
+    @Test
+    void deserializeCustom() throws JsonProcessingException {
+        String json = "{\"device_code\":\"helloWorld\",\"expires_in\":1800,\"interval\":5,\"user_code\":\"ABCDEFGH\"," +
+                "\"verification_uri\":\"https://activate.example.com\",\"foo\":\"bar\",\"bar\":\"baz\"}";
+        DeviceAuthorization resp = MAPPER.readValue(json, DeviceAuthorization.class);
+        assertEquals(2, resp.getCustomProperties().size());
+        assertEquals("bar", resp.getCustomProperties().get("foo"));
+        assertEquals("baz", resp.getCustomProperties().get("bar"));
     }
 
 }
