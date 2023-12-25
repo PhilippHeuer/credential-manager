@@ -14,6 +14,7 @@ import okhttp3.HttpUrl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,6 +74,18 @@ public class DeviceAuthorization {
     @JsonAnyGetter
     @JsonAnySetter
     private Map<String, Object> customProperties = new HashMap<>(0);
+
+    /**
+     * The timestamp the Device Authorization response was received.
+     */
+    private Instant issuedAt = Instant.now(); // not in the RFC
+
+    /**
+     * @return the approximate timestamp when this device and user code tuple will no longer be valid.
+     */
+    public Instant getExpiresAt() {
+        return issuedAt.plusSeconds(this.expiresIn);
+    }
 
     /**
      * @return the verification uri with the populated user_code query parameter.

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DeviceAuthorizationTest {
@@ -26,6 +27,8 @@ class DeviceAuthorizationTest {
         String json = "{\"device_code\":\"helloWorld\",\"expires_in\":1800,\"interval\":5,\"user_code\":\"ABCDEFGH\"," +
                 "\"verification_uri\":\"https://www.twitch.tv/activate?device-code=ABCDEFGH\"}";
         DeviceAuthorization resp = MAPPER.readValue(json, DeviceAuthorization.class);
+        assertNotNull(resp.getIssuedAt());
+        assertNotNull(resp.getExpiresAt());
         assertEquals("helloWorld", resp.getDeviceCode());
         assertEquals("ABCDEFGH", resp.getUserCode());
         assertEquals(1800, resp.getExpiresIn());

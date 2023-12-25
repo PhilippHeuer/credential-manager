@@ -42,9 +42,8 @@ public final class DeviceFlowController extends AuthenticationController impleme
     @Override
     public DeviceAuthorization startOAuth2DeviceAuthorizationGrantType(OAuth2IdentityProvider oAuth2IdentityProvider, Collection<Object> scopes, Consumer<DeviceTokenResponse> callback) {
         DeviceAuthorization request = oAuth2IdentityProvider.createDeviceFlowRequest(scopes);
-        Instant expiry = Instant.now().plusSeconds(request.getExpiresIn());
         AtomicInteger interval = new AtomicInteger(request.getInterval());
-        schedule(oAuth2IdentityProvider, request.getDeviceCode(), request.getUserCode(), expiry, interval, callback);
+        schedule(oAuth2IdentityProvider, request.getDeviceCode(), request.getUserCode(), request.getExpiresAt(), interval, callback);
         return request;
     }
 
