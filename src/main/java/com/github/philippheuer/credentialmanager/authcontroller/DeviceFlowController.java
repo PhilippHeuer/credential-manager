@@ -56,7 +56,7 @@ public final class DeviceFlowController extends AuthenticationController impleme
     public void close() {
         this.closed = true;
         if (this.shouldCloseExecutor) {
-            this.executor.close();
+            this.executor.shutdownNow();
         }
     }
 
