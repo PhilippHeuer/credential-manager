@@ -2,6 +2,7 @@ package com.github.philippheuer.credentialmanager.domain;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AccessLevel;
@@ -83,8 +84,9 @@ public class DeviceAuthorization {
     /**
      * @return the approximate timestamp when this device and user code tuple will no longer be valid.
      */
+    @JsonIgnore // in case of an auth server deviating from the RFC
     public Instant getExpiresAt() {
-        return issuedAt.plusSeconds(this.expiresIn);
+        return expiresIn > 0 ? issuedAt.plusSeconds(this.expiresIn) : Instant.MAX;
     }
 
     /**
