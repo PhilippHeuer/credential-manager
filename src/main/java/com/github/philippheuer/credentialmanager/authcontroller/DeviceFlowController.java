@@ -9,7 +9,7 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.credentialmanager.identityprovider.OAuth2IdentityProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.compare.ComparableUtils;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -30,26 +30,31 @@ public final class DeviceFlowController extends AuthenticationController impleme
 
     private final int maxExpiresIn;
     private final ScheduledExecutorService executor;
-    private boolean shouldCloseExecutor = false;
+    private final boolean shouldCloseExecutor;
     private volatile boolean closed = false;
 
     /**
      * Creates a {@link DeviceFlowController} with default settings.
      */
     public DeviceFlowController() {
-        this(Executors.newSingleThreadScheduledExecutor(), 0);
-        this.shouldCloseExecutor = true;
+        this(null, 0);
     }
 
     /**
      * Creates a {@link DeviceFlowController} with the specified executor and maximum expiry seconds.
      *
-     * @param executor     a not-null {@link ScheduledExecutorService}
+     * @param executor     an optional {@link ScheduledExecutorService}
      * @param maxExpiresIn the maximum duration in seconds to repeatedly request a device token; ignored if not positive
      */
-    public DeviceFlowController(@NotNull ScheduledExecutorService executor, int maxExpiresIn) {
-        this.executor = executor;
+    public DeviceFlowController(@Nullable ScheduledExecutorService executor, int maxExpiresIn) {
         this.maxExpiresIn = maxExpiresIn;
+        if (executor != null) {
+            this.executor = executor;
+            this.shouldCloseExecutor = false;
+        } else {
+            this.executor = Executors.newSingleThreadScheduledExecutor();
+            this.shouldCloseExecutor = true;
+        }
     }
 
     @Override
