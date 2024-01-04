@@ -8,6 +8,8 @@ import com.github.philippheuer.credentialmanager.domain.DeviceTokenResponse;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.credentialmanager.identityprovider.OAuth2IdentityProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.compare.ComparableUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -26,24 +28,38 @@ import java.util.function.Consumer;
 @Slf4j
 public final class DeviceFlowController extends AuthenticationController implements Closeable {
 
+    private final int maxExpiresIn;
     private final ScheduledExecutorService executor;
     private boolean shouldCloseExecutor = false;
     private volatile boolean closed = false;
 
+    /**
+     * Creates a {@link DeviceFlowController} with default settings.
+     */
     public DeviceFlowController() {
-        this(Executors.newSingleThreadScheduledExecutor());
+        this(Executors.newSingleThreadScheduledExecutor(), 0);
         this.shouldCloseExecutor = true;
     }
 
-    public DeviceFlowController(ScheduledExecutorService executor) {
+    /**
+     * Creates a {@link DeviceFlowController} with the specified executor and maximum expiry seconds.
+     *
+     * @param executor     a not-null {@link ScheduledExecutorService}
+     * @param maxExpiresIn the maximum duration in seconds to repeatedly request a device token; ignored if not positive
+     */
+    public DeviceFlowController(@NotNull ScheduledExecutorService executor, int maxExpiresIn) {
         this.executor = executor;
+        this.maxExpiresIn = maxExpiresIn;
     }
 
     @Override
     public DeviceAuthorization startOAuth2DeviceAuthorizationGrantType(OAuth2IdentityProvider oAuth2IdentityProvider, Collection<Object> scopes, Consumer<DeviceTokenResponse> callback) {
         DeviceAuthorization request = oAuth2IdentityProvider.createDeviceFlowRequest(scopes);
         AtomicInteger interval = new AtomicInteger(request.getInterval());
-        schedule(oAuth2IdentityProvider, request.getDeviceCode(), request.getUserCode(), request.getExpiresAt(), interval, callback);
+        Instant expiry = maxExpiresIn > 0
+                ? ComparableUtils.min(request.getIssuedAt().plusSeconds(maxExpiresIn), request.getExpiresAt())
+                : request.getExpiresAt();
+        schedule(oAuth2IdentityProvider, request.getDeviceCode(), request.getUserCode(), expiry, interval, callback);
         return request;
     }
 
