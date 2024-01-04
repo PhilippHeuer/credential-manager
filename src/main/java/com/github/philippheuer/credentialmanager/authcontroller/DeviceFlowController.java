@@ -94,25 +94,11 @@ public final class DeviceFlowController extends AuthenticationController impleme
                 return;
             }
 
+            DeviceTokenResponse response;
             try {
-                DeviceTokenResponse response = identityProvider.getDeviceAccessToken(deviceCode);
-                OAuth2Credential credential = response.getCredential();
-                assert credential != null || response.getError() != null;
-                if (credential != null || !response.getError().shouldRetry()) {
-                    callback.accept(response);
-
-                    CredentialManager credentialManager = getCredentialManager();
-                    if (credential != null && credentialManager != null) {
-                        credentialManager.addCredential(identityProvider.getProviderName(), credential);
-                    }
-                    return;
-                } else {
-                    log.debug("Received {} error from device token endpoint for user {}; will retry...", response.getError(), userCode);
-                    if (response.getError() == DeviceFlowError.SLOW_DOWN) {
-                        interval.addAndGet(5);
-                    }
-                }
+                response = identityProvider.getDeviceAccessToken(deviceCode);
             } catch (Exception e) {
+                response = null;
                 log.warn("Encountered exception when checking for device access token; will retry...", e);
 
                 if (e.getCause() instanceof IOException) {
@@ -121,6 +107,25 @@ public final class DeviceFlowController extends AuthenticationController impleme
                     // such as doubling the polling interval on each such connection timeout, is RECOMMENDED.
                     // https://datatracker.ietf.org/doc/html/rfc8628#section-3.5
                     interval.updateAndGet(i -> i <= 30 ? i * 2 : i + 10);
+                }
+            }
+
+            if (response != null) {
+                OAuth2Credential credential = response.getCredential();
+                assert credential != null || response.getError() != null;
+                if (credential != null || !response.getError().shouldRetry()) {
+                    CredentialManager credentialManager = getCredentialManager();
+                    if (credential != null && credentialManager != null) {
+                        credentialManager.addCredential(identityProvider.getProviderName(), credential);
+                    }
+
+                    callback.accept(response);
+                    return;
+                } else {
+                    log.debug("Received {} error from device token endpoint for user {}; will retry...", response.getError(), userCode);
+                    if (response.getError() == DeviceFlowError.SLOW_DOWN) {
+                        interval.addAndGet(5);
+                    }
                 }
             }
 
