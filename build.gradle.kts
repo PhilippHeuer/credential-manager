@@ -49,6 +49,7 @@ dependencies {
 
     // Logging
     api("org.slf4j:slf4j-api:2.0.10")
+    testImplementation("org.slf4j:slf4j-simple:2.0.10")
 
     // Commons Lang
     implementation("org.apache.commons:commons-lang3:3.14.0")
