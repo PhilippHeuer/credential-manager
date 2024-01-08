@@ -48,7 +48,7 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-databind:2.16.1")
 
     // Logging
-    api("org.slf4j:slf4j-api:2.0.10")
+    api("org.slf4j:slf4j-api:2.0.11")
     testImplementation("org.slf4j:slf4j-simple:2.0.10")
 
     // Commons Lang
