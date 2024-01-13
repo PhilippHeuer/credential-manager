@@ -31,6 +31,7 @@ jobs:
   check:
     uses: cidverse/catalog/.github/workflows/shared-ci.yml@main
     permissions:
+      actions: read # actions
       contents: write # create release
       packages: write # publish packages
       security-events: write # sarif reports
