@@ -52,7 +52,7 @@ dependencies {
     testImplementation("org.slf4j:slf4j-simple:2.0.14")
 
     // Commons Lang
-    implementation("org.apache.commons:commons-lang3:3.15.0")
+    implementation("org.apache.commons:commons-lang3:3.16.0")
 
     // HTTP Client
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
