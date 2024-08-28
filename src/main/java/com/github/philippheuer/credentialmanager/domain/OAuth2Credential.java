@@ -1,5 +1,12 @@
 package com.github.philippheuer.credentialmanager.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +22,9 @@ import java.util.Map;
 @Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OAuth2Credential extends Credential {
 
     /**
@@ -54,6 +64,7 @@ public class OAuth2Credential extends Credential {
      * Token Received Date
      */
     @Setter
+    @JsonIgnore
     private Instant receivedAt;
 
     /**
@@ -112,7 +123,8 @@ public class OAuth2Credential extends Credential {
      * @param scopes           Scopes
      * @param context          Credential context
      */
-    public OAuth2Credential(String identityProvider, String accessToken, String refreshToken, String userId, String userName, Integer expiresIn, List<String> scopes, Map<String, Object> context) {
+    @JsonCreator
+    public OAuth2Credential(@JsonProperty("identity_provider") String identityProvider, @JsonProperty("access_token") String accessToken, @JsonProperty("refresh_token") String refreshToken, @JsonProperty("user_id") String userId, @JsonProperty("user_name") String userName, @JsonProperty("expires_in") Integer expiresIn, @JsonProperty("scopes") List<String> scopes, @JsonProperty("context") Map<String, Object> context) {
         super(identityProvider, userId);
         this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
         this.refreshToken = refreshToken;

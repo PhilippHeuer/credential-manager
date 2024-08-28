@@ -32,6 +32,7 @@ public class DummyAuthController extends AuthenticationController {
      * @param redirectUrl            Redirect url
      * @param scopes                 Requested scopes
      */
+    @Override
     public void startOAuth2AuthorizationCodeGrantType(OAuth2IdentityProvider oAuth2IdentityProvider, String redirectUrl, List<Object> scopes) {
         log.debug("Called startOAuth2ImplicitGrantType!");
     }
