@@ -13,13 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * The CredentialManager
@@ -158,6 +156,7 @@ public class CredentialManager {
         }
 
         this.credentials.add(credential);
+        this.authenticationController.registerCredential(credential);
     }
 
     /**
@@ -186,6 +185,7 @@ public class CredentialManager {
     @Synchronized
     public void load() {
         this.credentials = storageBackend.loadCredentials();
+        this.credentials.forEach(authenticationController::registerCredential);
     }
 
     /**
