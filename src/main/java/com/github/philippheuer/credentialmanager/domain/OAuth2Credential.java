@@ -2,12 +2,16 @@ package com.github.philippheuer.credentialmanager.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -45,6 +49,13 @@ public class OAuth2Credential extends Credential {
     private String userName;
 
     /**
+     * Token Issued Timestamp
+     */
+    @Setter
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+    private Instant issuedAt;
+
+    /**
      * Token Expiry (in seconds, if complaint with RFC 6749)
      */
     @Setter
@@ -59,13 +70,6 @@ public class OAuth2Credential extends Credential {
      * Access Token context that can be used to store additional information
      */
     private Map<String, Object> context;
-
-    /**
-     * Token Received Date
-     */
-    @Setter
-    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
-    private Instant receivedAt;
 
     /**
      * Constructor
@@ -127,7 +131,7 @@ public class OAuth2Credential extends Credential {
      * @param refreshToken     Refresh Token
      * @param userId           User Id
      * @param userName         User Name
-     * @param receivedAt       Timestamp of when the token was received
+     * @param issuedAt         Timestamp of when the token was issued
      * @param expiresIn        Expires in x seconds
      * @param scopes           Scopes
      * @param context          Credential context
@@ -139,7 +143,7 @@ public class OAuth2Credential extends Credential {
             @JsonProperty("refresh_token") String refreshToken,
             @JsonProperty("user_id") String userId,
             @JsonProperty("user_name") String userName,
-            @JsonProperty("received_at") Instant receivedAt,
+            @JsonProperty("issued_at") Instant issuedAt,
             @JsonProperty("expires_in") Integer expiresIn,
             @JsonProperty("scopes") List<String> scopes,
             @JsonProperty("context") Map<String, Object> context
@@ -148,10 +152,10 @@ public class OAuth2Credential extends Credential {
         this.accessToken = accessToken.startsWith("oauth:") ? accessToken.substring("oauth:".length()) : accessToken;
         this.refreshToken = refreshToken;
         this.userName = userName;
+        this.issuedAt = issuedAt != null ? issuedAt : Instant.now();
         this.expiresIn = expiresIn;
         this.scopes = scopes != null ? scopes : new ArrayList<>(0);
         this.context = context != null ? context : new HashMap<>(0);
-        this.receivedAt = receivedAt != null ? receivedAt : Instant.now();
     }
 
     /**
@@ -183,8 +187,28 @@ public class OAuth2Credential extends Credential {
             this.context.clear();
             this.context.putAll(newCredential.context);
         }
-        if (newCredential.receivedAt != null) {
-            this.receivedAt = newCredential.receivedAt;
+        if (newCredential.issuedAt != null) {
+            this.issuedAt = newCredential.issuedAt;
         }
+    }
+
+    /**
+     * @return the time at which the token was created
+     * @deprecated in favor of {@link #getIssuedAt()}
+     */
+    @Deprecated
+    @JsonIgnore
+    public Instant getReceivedAt() {
+        return issuedAt;
+    }
+
+    /**
+     * @param receivedAt the time at which the token was created
+     * @deprecated in favor of {@link #setIssuedAt(Instant)}
+     */
+    @Deprecated
+    @JsonIgnore
+    public void setReceivedAt(Instant receivedAt) {
+        this.issuedAt = receivedAt;
     }
 }

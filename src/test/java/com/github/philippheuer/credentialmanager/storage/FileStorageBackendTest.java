@@ -53,7 +53,7 @@ class FileStorageBackendTest {
 
     @Test
     void readWrite() throws IOException {
-        String json = "[{\"identity_provider\":\"test\",\"access_token\":\"asdf\",\"received_at\":\"2024-09-01T00:38:43.557322341Z\"}]";
+        String json = "[{\"identity_provider\":\"test\",\"access_token\":\"asdf\",\"issued_at\":\"2024-09-01T00:38:43.557322341Z\"}]";
         Files.write(path, json.getBytes(StandardCharsets.UTF_8));
 
         FileStorageBackend storage = new FileStorageBackend(file, OBJECT_MAPPER, OAuth2Credential.class);
@@ -62,16 +62,16 @@ class FileStorageBackendTest {
 
         OAuth2Credential actual = (OAuth2Credential) credentials.get(0);
         OAuth2Credential expected = new OAuth2Credential("test", "asdf");
-        expected.setReceivedAt(actual.getReceivedAt());
+        expected.setIssuedAt(actual.getIssuedAt());
         assertEquals(expected, actual);
 
         OAuth2Credential another = new OAuth2Credential("test", "qwerty");
-        another.setReceivedAt(actual.getReceivedAt()); // simplify testing
+        another.setIssuedAt(actual.getIssuedAt()); // simplify testing
         credentials.add(another);
         storage.saveCredentials(credentials);
 
         String output = String.join("", Files.readAllLines(path));
-        String expectedOutput = "[{\"identity_provider\":\"test\",\"access_token\":\"asdf\",\"scopes\":[],\"context\":{},\"received_at\":\"2024-09-01T00:38:43.557322341Z\"},{\"identity_provider\":\"test\",\"access_token\":\"qwerty\",\"scopes\":[],\"context\":{},\"received_at\":\"2024-09-01T00:38:43.557322341Z\"}]";
+        String expectedOutput = "[{\"identity_provider\":\"test\",\"access_token\":\"asdf\",\"issued_at\":\"2024-09-01T00:38:43.557322341Z\",\"scopes\":[],\"context\":{}},{\"identity_provider\":\"test\",\"access_token\":\"qwerty\",\"issued_at\":\"2024-09-01T00:38:43.557322341Z\",\"scopes\":[],\"context\":{}}]";
         assertEquals(expectedOutput, output);
     }
 
