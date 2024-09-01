@@ -85,8 +85,7 @@ public class OAuth2Credential extends Credential {
      * @param context          Credential context
      */
     public OAuth2Credential(String identityProvider, String accessToken, @NotNull Map<String, Object> context) {
-        this(identityProvider, accessToken, null, null, null, null, null);
-        this.context = context;
+        this(identityProvider, accessToken, null, null, null, null, null, context);
     }
 
     /**
@@ -101,14 +100,7 @@ public class OAuth2Credential extends Credential {
      * @param scopes           Scopes
      */
     public OAuth2Credential(String identityProvider, String accessToken, String refreshToken, String userId, String userName, Integer expiresIn, List<String> scopes) {
-        super(identityProvider, userId);
-        this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
-        this.refreshToken = refreshToken;
-        this.userName = userName;
-        this.expiresIn = expiresIn;
-        this.scopes = scopes != null ? scopes : new ArrayList<>(0);
-        this.context = new HashMap<>();
-        this.receivedAt = Instant.now();
+        this(identityProvider, accessToken, refreshToken, userId, userName, expiresIn, scopes, null);
     }
 
     /**
@@ -124,14 +116,7 @@ public class OAuth2Credential extends Credential {
      * @param context          Credential context
      */
     public OAuth2Credential(String identityProvider, String accessToken, String refreshToken, String userId, String userName, Integer expiresIn, List<String> scopes, Map<String, Object> context) {
-        super(identityProvider, userId);
-        this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
-        this.refreshToken = refreshToken;
-        this.userName = userName;
-        this.expiresIn = expiresIn;
-        this.scopes = scopes != null ? scopes : new ArrayList<>(0);
-        this.context = context != null ? context : new HashMap<>(0);
-        this.receivedAt = Instant.now();
+        this(identityProvider, accessToken, refreshToken, userId, userName, expiresIn, scopes, context, null);
     }
 
     /**
@@ -145,7 +130,7 @@ public class OAuth2Credential extends Credential {
      * @param expiresIn        Expires in x seconds
      * @param scopes           Scopes
      * @param context          Credential context
-     * @param receivedAt       Issued At
+     * @param receivedAt       Timestamp of when the token was issued
      */
     @JsonCreator
     public OAuth2Credential(@JsonProperty("identity_provider") String identityProvider, @JsonProperty("access_token") String accessToken, @JsonProperty("refresh_token") String refreshToken, @JsonProperty("user_id") String userId, @JsonProperty("user_name") String userName, @JsonProperty("expires_in") Integer expiresIn, @JsonProperty("scopes") List<String> scopes, @JsonProperty("context") Map<String, Object> context, @JsonProperty("received_at") Instant receivedAt) {
