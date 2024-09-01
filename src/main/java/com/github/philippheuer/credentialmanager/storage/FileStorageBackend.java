@@ -1,6 +1,7 @@
 package com.github.philippheuer.credentialmanager.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.philippheuer.credentialmanager.api.IStorageBackend;
 import com.github.philippheuer.credentialmanager.domain.Credential;
 import lombok.Locked;
@@ -21,7 +22,7 @@ public class FileStorageBackend implements IStorageBackend {
     @SneakyThrows
     public <T extends Credential> FileStorageBackend(@NotNull File file, @NotNull ObjectMapper mapper, @NotNull Class<T> credentialClass) {
         this.file = file;
-        this.objectMapper = mapper;
+        this.objectMapper = mapper.registerModule(new JavaTimeModule());
 
         if (file.exists() && file.length() > 0L) {
             List<T> creds = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, credentialClass));

@@ -1,7 +1,7 @@
 package com.github.philippheuer.credentialmanager.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -64,7 +64,7 @@ public class OAuth2Credential extends Credential {
      * Token Received Date
      */
     @Setter
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     private Instant receivedAt;
 
     /**
@@ -123,8 +123,7 @@ public class OAuth2Credential extends Credential {
      * @param scopes           Scopes
      * @param context          Credential context
      */
-    @JsonCreator
-    public OAuth2Credential(@JsonProperty("identity_provider") String identityProvider, @JsonProperty("access_token") String accessToken, @JsonProperty("refresh_token") String refreshToken, @JsonProperty("user_id") String userId, @JsonProperty("user_name") String userName, @JsonProperty("expires_in") Integer expiresIn, @JsonProperty("scopes") List<String> scopes, @JsonProperty("context") Map<String, Object> context) {
+    public OAuth2Credential(String identityProvider, String accessToken, String refreshToken, String userId, String userName, Integer expiresIn, List<String> scopes, Map<String, Object> context) {
         super(identityProvider, userId);
         this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
         this.refreshToken = refreshToken;
@@ -133,6 +132,31 @@ public class OAuth2Credential extends Credential {
         this.scopes = scopes != null ? scopes : new ArrayList<>(0);
         this.context = context != null ? context : new HashMap<>(0);
         this.receivedAt = Instant.now();
+    }
+
+    /**
+     * Constructor
+     *
+     * @param identityProvider Identity Provider
+     * @param accessToken      Authentication Token
+     * @param refreshToken     Refresh Token
+     * @param userId           User Id
+     * @param userName         User Name
+     * @param expiresIn        Expires in x seconds
+     * @param scopes           Scopes
+     * @param context          Credential context
+     * @param receivedAt       Issued At
+     */
+    @JsonCreator
+    public OAuth2Credential(@JsonProperty("identity_provider") String identityProvider, @JsonProperty("access_token") String accessToken, @JsonProperty("refresh_token") String refreshToken, @JsonProperty("user_id") String userId, @JsonProperty("user_name") String userName, @JsonProperty("expires_in") Integer expiresIn, @JsonProperty("scopes") List<String> scopes, @JsonProperty("context") Map<String, Object> context, @JsonProperty("received_at") Instant receivedAt) {
+        super(identityProvider, userId);
+        this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
+        this.refreshToken = refreshToken;
+        this.userName = userName;
+        this.expiresIn = expiresIn;
+        this.scopes = scopes != null ? scopes : new ArrayList<>(0);
+        this.context = context != null ? context : new HashMap<>(0);
+        this.receivedAt = receivedAt != null ? receivedAt : Instant.now();
     }
 
     /**
