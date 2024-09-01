@@ -116,7 +116,7 @@ public class OAuth2Credential extends Credential {
      * @param context          Credential context
      */
     public OAuth2Credential(String identityProvider, String accessToken, String refreshToken, String userId, String userName, Integer expiresIn, List<String> scopes, Map<String, Object> context) {
-        this(identityProvider, accessToken, refreshToken, userId, userName, expiresIn, scopes, context, null);
+        this(identityProvider, accessToken, refreshToken, userId, userName, null, expiresIn, scopes, context);
     }
 
     /**
@@ -127,15 +127,25 @@ public class OAuth2Credential extends Credential {
      * @param refreshToken     Refresh Token
      * @param userId           User Id
      * @param userName         User Name
+     * @param receivedAt       Timestamp of when the token was received
      * @param expiresIn        Expires in x seconds
      * @param scopes           Scopes
      * @param context          Credential context
-     * @param receivedAt       Timestamp of when the token was issued
      */
     @JsonCreator
-    public OAuth2Credential(@JsonProperty("identity_provider") String identityProvider, @JsonProperty("access_token") String accessToken, @JsonProperty("refresh_token") String refreshToken, @JsonProperty("user_id") String userId, @JsonProperty("user_name") String userName, @JsonProperty("expires_in") Integer expiresIn, @JsonProperty("scopes") List<String> scopes, @JsonProperty("context") Map<String, Object> context, @JsonProperty("received_at") Instant receivedAt) {
+    public OAuth2Credential(
+            @JsonProperty("identity_provider") String identityProvider,
+            @JsonProperty("access_token") String accessToken,
+            @JsonProperty("refresh_token") String refreshToken,
+            @JsonProperty("user_id") String userId,
+            @JsonProperty("user_name") String userName,
+            @JsonProperty("received_at") Instant receivedAt,
+            @JsonProperty("expires_in") Integer expiresIn,
+            @JsonProperty("scopes") List<String> scopes,
+            @JsonProperty("context") Map<String, Object> context
+    ) {
         super(identityProvider, userId);
-        this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
+        this.accessToken = accessToken.startsWith("oauth:") ? accessToken.substring("oauth:".length()) : accessToken;
         this.refreshToken = refreshToken;
         this.userName = userName;
         this.expiresIn = expiresIn;
