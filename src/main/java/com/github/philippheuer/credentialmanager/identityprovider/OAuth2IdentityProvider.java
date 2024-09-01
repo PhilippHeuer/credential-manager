@@ -499,8 +499,8 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     public boolean isValid(Credential credential) {
         if (credential instanceof OAuth2Credential) {
             OAuth2Credential oauthCred = (OAuth2Credential) credential;
-            if (oauthCred.getReceivedAt() != null && oauthCred.getExpiresIn() != null) {
-                return oauthCred.getReceivedAt().plusSeconds(oauthCred.getExpiresIn()).compareTo(Instant.now()) > 0;
+            if (oauthCred.getIssuedAt() != null && oauthCred.getExpiresIn() != null) {
+                return oauthCred.getIssuedAt().plusSeconds(oauthCred.getExpiresIn()).compareTo(Instant.now()) > 0;
             }
         }
 

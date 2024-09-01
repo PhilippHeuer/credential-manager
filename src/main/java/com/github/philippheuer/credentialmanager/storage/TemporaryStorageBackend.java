@@ -4,7 +4,6 @@ import com.github.philippheuer.credentialmanager.api.IStorageBackend;
 import com.github.philippheuer.credentialmanager.domain.Credential;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,7 +41,7 @@ public class TemporaryStorageBackend implements IStorageBackend {
     public Optional<Credential> getCredentialByUserId(String userId) {
         for (Credential cred : credentialStorage) {
             if (cred.getUserId().equalsIgnoreCase(userId)) {
-                return Optional.ofNullable(cred);
+                return Optional.of(cred);
             }
         }
 

@@ -1,6 +1,17 @@
 package com.github.philippheuer.credentialmanager.domain;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -15,6 +26,9 @@ import java.util.Map;
 @Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OAuth2Credential extends Credential {
 
     /**
@@ -35,6 +49,13 @@ public class OAuth2Credential extends Credential {
     private String userName;
 
     /**
+     * Token Issued Timestamp
+     */
+    @Setter
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+    private Instant issuedAt;
+
+    /**
      * Token Expiry (in seconds, if complaint with RFC 6749)
      */
     @Setter
@@ -49,12 +70,6 @@ public class OAuth2Credential extends Credential {
      * Access Token context that can be used to store additional information
      */
     private Map<String, Object> context;
-
-    /**
-     * Token Received Date
-     */
-    @Setter
-    private Instant receivedAt;
 
     /**
      * Constructor
@@ -74,8 +89,7 @@ public class OAuth2Credential extends Credential {
      * @param context          Credential context
      */
     public OAuth2Credential(String identityProvider, String accessToken, @NotNull Map<String, Object> context) {
-        this(identityProvider, accessToken, null, null, null, null, null);
-        this.context = context;
+        this(identityProvider, accessToken, null, null, null, null, null, context);
     }
 
     /**
@@ -90,14 +104,7 @@ public class OAuth2Credential extends Credential {
      * @param scopes           Scopes
      */
     public OAuth2Credential(String identityProvider, String accessToken, String refreshToken, String userId, String userName, Integer expiresIn, List<String> scopes) {
-        super(identityProvider, userId);
-        this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
-        this.refreshToken = refreshToken;
-        this.userName = userName;
-        this.expiresIn = expiresIn;
-        this.scopes = scopes != null ? scopes : new ArrayList<>(0);
-        this.context = new HashMap<>();
-        this.receivedAt = Instant.now();
+        this(identityProvider, accessToken, refreshToken, userId, userName, expiresIn, scopes, null);
     }
 
     /**
@@ -113,14 +120,42 @@ public class OAuth2Credential extends Credential {
      * @param context          Credential context
      */
     public OAuth2Credential(String identityProvider, String accessToken, String refreshToken, String userId, String userName, Integer expiresIn, List<String> scopes, Map<String, Object> context) {
+        this(identityProvider, accessToken, refreshToken, userId, userName, null, expiresIn, scopes, context);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param identityProvider Identity Provider
+     * @param accessToken      Authentication Token
+     * @param refreshToken     Refresh Token
+     * @param userId           User Id
+     * @param userName         User Name
+     * @param issuedAt         Timestamp of when the token was issued
+     * @param expiresIn        Expires in x seconds
+     * @param scopes           Scopes
+     * @param context          Credential context
+     */
+    @JsonCreator
+    public OAuth2Credential(
+            @JsonProperty("identity_provider") String identityProvider,
+            @JsonProperty("access_token") String accessToken,
+            @JsonProperty("refresh_token") String refreshToken,
+            @JsonProperty("user_id") String userId,
+            @JsonProperty("user_name") String userName,
+            @JsonProperty("issued_at") Instant issuedAt,
+            @JsonProperty("expires_in") Integer expiresIn,
+            @JsonProperty("scopes") List<String> scopes,
+            @JsonProperty("context") Map<String, Object> context
+    ) {
         super(identityProvider, userId);
-        this.accessToken = accessToken.startsWith("oauth:") ? accessToken.replace("oauth:", "") : accessToken;
+        this.accessToken = accessToken.startsWith("oauth:") ? accessToken.substring("oauth:".length()) : accessToken;
         this.refreshToken = refreshToken;
         this.userName = userName;
+        this.issuedAt = issuedAt != null ? issuedAt : Instant.now();
         this.expiresIn = expiresIn;
         this.scopes = scopes != null ? scopes : new ArrayList<>(0);
         this.context = context != null ? context : new HashMap<>(0);
-        this.receivedAt = Instant.now();
     }
 
     /**
@@ -152,8 +187,28 @@ public class OAuth2Credential extends Credential {
             this.context.clear();
             this.context.putAll(newCredential.context);
         }
-        if (newCredential.receivedAt != null) {
-            this.receivedAt = newCredential.receivedAt;
+        if (newCredential.issuedAt != null) {
+            this.issuedAt = newCredential.issuedAt;
         }
+    }
+
+    /**
+     * @return the time at which the token was created
+     * @deprecated in favor of {@link #getIssuedAt()}
+     */
+    @Deprecated
+    @JsonIgnore
+    public Instant getReceivedAt() {
+        return issuedAt;
+    }
+
+    /**
+     * @param receivedAt the time at which the token was created
+     * @deprecated in favor of {@link #setIssuedAt(Instant)}
+     */
+    @Deprecated
+    @JsonIgnore
+    public void setReceivedAt(Instant receivedAt) {
+        this.issuedAt = receivedAt;
     }
 }
