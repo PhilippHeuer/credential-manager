@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,19 +48,28 @@ public class CredentialManager {
      */
     private List<Credential> credentials;
 
+    CredentialManager(IStorageBackend storageBackend, AuthenticationController authenticationController, Collection<IdentityProvider> identityProviders) {
+        this.storageBackend = storageBackend;
+        this.authenticationController = authenticationController;
+        authenticationController.setCredentialManager(this);
+
+        // register identity providers
+        identityProviders.forEach(this::registerIdentityProvider);
+
+        // load credentials
+        this.load();
+    }
+
     /**
      * Creates a new CredentialManager
      *
      * @param storageBackend           The Storage Backend
      * @param authenticationController Authentication Controller
+     * @deprecated in favor of {@link CredentialManagerBuilder#build()}
      */
+    @Deprecated
     public CredentialManager(IStorageBackend storageBackend, AuthenticationController authenticationController) {
-        this.storageBackend = storageBackend;
-        this.authenticationController = authenticationController;
-        authenticationController.setCredentialManager(this);
-
-        // load credentials
-        this.load();
+        this(storageBackend, authenticationController, Collections.emptyList());
     }
 
     /**
