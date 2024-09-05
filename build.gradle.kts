@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("me.philippheuer.configuration") version "0.11.2"
+    id("me.philippheuer.configuration") version "0.12.0"
 }
 
 version = properties["version"] as String
