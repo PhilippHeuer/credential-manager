@@ -34,11 +34,17 @@ public class RefreshingOAuth2Controller extends AuthenticationController {
     private final AuthenticationController delegate;
     private final ScheduledExecutorService executor;
     private final long minimumRefreshInterval;
+    private final Consumer<OAuth2Credential> onRefresh;
 
-    public RefreshingOAuth2Controller(AuthenticationController delegate, ScheduledExecutorService executor, Duration minimumRefreshInterval) {
+    public RefreshingOAuth2Controller(AuthenticationController delegate, ScheduledExecutorService executor, Duration minimumRefreshInterval, Consumer<OAuth2Credential> onRefresh) {
         this.delegate = delegate;
         this.executor = executor;
         this.minimumRefreshInterval = minimumRefreshInterval.getSeconds();
+        this.onRefresh = onRefresh != null ? onRefresh : x -> {};
+    }
+
+    public RefreshingOAuth2Controller(AuthenticationController delegate, ScheduledExecutorService executor, Duration minimumRefreshInterval) {
+        this(delegate, executor, minimumRefreshInterval, null);
     }
 
     public RefreshingOAuth2Controller(AuthenticationController delegate, ScheduledExecutorService executor) {
@@ -114,6 +120,7 @@ public class RefreshingOAuth2Controller extends AuthenticationController {
             Optional<OAuth2Credential> refreshed = identityProvider.refreshCredential(credential);
             if (refreshed.isPresent()) {
                 credential.updateCredential(refreshed.get());
+                onRefresh.accept(credential);
                 return true;
             } else {
                 log.warn("Could not refresh credential; it may be revoked! {}", credential);
@@ -121,6 +128,7 @@ public class RefreshingOAuth2Controller extends AuthenticationController {
         } else if (StringUtils.isEmpty(credential.getUserId())) {
             // app access token
             credential.updateCredential(identityProvider.getAppAccessToken(String.join(" ", credential.getScopes())));
+            onRefresh.accept(credential);
             return true;
         } else {
             log.trace("Credential for User ID {} does not have sufficient information to be able to be refreshed", credential.getUserId());
