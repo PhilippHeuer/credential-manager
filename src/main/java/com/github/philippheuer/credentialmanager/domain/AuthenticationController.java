@@ -60,4 +60,13 @@ public abstract class AuthenticationController {
         throw new UnsupportedOperationException("This controller does not implement the Device Authorization Grant Flow.");
     }
 
+    /**
+     * Initializes a credential with the authentication controller
+     *
+     * @param credential Credential
+     */
+    public void registerCredential(Credential credential) {
+        // do nothing by default
+    }
+
 }
