@@ -1,20 +1,38 @@
 # *CredentialManager*
 
+[![MavenCentral](https://img.shields.io/maven-central/v/com.github.philippheuer.credentialmanager/credentialmanager?label=latest)](https://search.maven.org/artifact/com.github.philippheuer.credentialmanager/credentialmanager)
+[![Javadoc](https://javadoc.io/badge2/com.github.philippheuer.credentialmanager/credentialmanager/javadoc.svg?label=javadoc)](https://javadoc.io/doc/com.github.philippheuer.credentialmanager/credentialmanager)
+[![Reproducible Builds](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jvm-repo-rebuild/reproducible-central/master/content/com/github/philippheuer/credentialmanager/badge.json)](https://github.com/jvm-repo-rebuild/reproducible-central/blob/master/content/com/github/philippheuer/credentialmanager/README.md)
+
 # Description
 
 A simple OAuth Client & CredentialManager Library, that supports multiple storage backends.
 
 # Import
 
-| Module                                                                                                                                                                                                                              | Javadoc                                                                                                                                                                                                           |
-|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [![Lib](https://img.shields.io/maven-central/v/com.github.philippheuer.credentialmanager/credentialmanager?label=credentialmanager)](https://search.maven.org/artifact/com.github.philippheuer.credentialmanager/credentialmanager) | [![Javadoc](https://javadoc.io/badge2/com.github.philippheuer.credentialmanager/credentialmanager/javadoc.svg?label=javadoc)](https://javadoc.io/doc/com.github.philippheuer.credentialmanager/credentialmanager) |
+**Gradle:**
+
+```kotlin
+dependencies {
+    implementation("com.github.philippheuer.credentialmanager:credentialmanager:0.3.1")
+}
+```
+
+**Maven:**
+
+```xml
+<dependency>
+    <groupId>com.github.philippheuer.credentialmanager</groupId>
+    <artifactId>credentialmanager</artifactId>
+    <version>0.3.1</version>
+</dependency>
+```
 
 # Initialization
 
 ## Credential Manager
 
-```groovy
+```java
 CredentialManager credentialManager = CredentialManagerBuilder.builder()
     .withStorageBackend(new TemporaryStorageBackend())
     .build();
@@ -24,7 +42,7 @@ CredentialManager credentialManager = CredentialManagerBuilder.builder()
 
 This is an in-memory storage backend as an example. You can provide your own storage backend by supplying it in the builder to store/load the credentials from wherever you want.
 
-```groovy
+```java
 public class TemporaryStorageBackend implements IStorageBackend {
 
     /**
