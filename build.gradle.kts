@@ -50,8 +50,8 @@ dependencies {
     api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     // Logging
-    api("org.slf4j:slf4j-api:2.0.16")
-    testImplementation("org.slf4j:slf4j-simple:2.0.16")
+    api("org.slf4j:slf4j-api:2.0.17")
+    testImplementation("org.slf4j:slf4j-simple:2.0.17")
 
     // Commons Lang
     implementation("org.apache.commons:commons-lang3:3.17.0")
