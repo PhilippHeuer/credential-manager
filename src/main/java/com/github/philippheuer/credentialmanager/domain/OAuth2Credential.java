@@ -211,4 +211,22 @@ public class OAuth2Credential extends Credential {
     public void setReceivedAt(Instant receivedAt) {
         this.issuedAt = receivedAt;
     }
+
+    /**
+     * Checks whether the token has expired.
+     *
+     * <ul>
+     *   <li>If {@code issuedAt} is {@code null}, the token is considered expired.</li>
+     *   <li>If {@code expiresIn} is {@code null}, the token is considered to never expire.</li>
+     *   <li>Otherwise, the token is considered expired, if the current time is after
+     *       {@code issuedAt + expiresIn} seconds.</li>
+     * </ul>
+     *
+     * @return {@code true} if the token has expired, {@code false} otherwise
+     */
+    public boolean isExpired() {
+        if (issuedAt == null) return true; // missing issuedAt timestamp
+        if (expiresIn == null) return false; // no expiration
+        return issuedAt.plusSeconds(expiresIn).isBefore(Instant.now());
+    }
 }
