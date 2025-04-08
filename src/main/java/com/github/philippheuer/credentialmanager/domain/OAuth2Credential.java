@@ -213,6 +213,23 @@ public class OAuth2Credential extends Credential {
     }
 
     /**
+     * Calculates the approximate timestamp when this token will no longer be valid.
+     *
+     * <ul>
+     *   <li>If {@code issuedAt} is {@code null}, the token is considered expired - {@code Instant.MIN}.</li>
+     *   <li>If {@code expiresIn} is {@code null}, the token is considered to never expire - {@code Instant.MAX}.</li>
+     * </ul>
+     *
+     * @return Instant when the token expires
+     */
+    @JsonIgnore
+    public Instant getExpiresAt() {
+        if (issuedAt == null) return Instant.MIN; // missing issuedAt timestamp
+        if (expiresIn == null) return Instant.MAX; // no expiration
+        return expiresIn > 0 ? issuedAt.plusSeconds(this.expiresIn) : Instant.MAX;
+    }
+
+    /**
      * Checks whether the token has expired.
      *
      * <ul>
@@ -224,9 +241,8 @@ public class OAuth2Credential extends Credential {
      *
      * @return {@code true} if the token has expired, {@code false} otherwise
      */
+    @JsonIgnore
     public boolean isExpired() {
-        if (issuedAt == null) return true; // missing issuedAt timestamp
-        if (expiresIn == null) return false; // no expiration
-        return issuedAt.plusSeconds(expiresIn).isBefore(Instant.now());
+        return Instant.now().isAfter(getExpiresAt());
     }
 }
