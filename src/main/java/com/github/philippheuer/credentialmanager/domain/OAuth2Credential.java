@@ -226,7 +226,7 @@ public class OAuth2Credential extends Credential {
     public Instant getExpiresAt() {
         if (issuedAt == null) return Instant.MIN; // missing issuedAt timestamp
         if (expiresIn == null) return Instant.MAX; // no expiration
-        return expiresIn > 0 ? issuedAt.plusSeconds(this.expiresIn) : Instant.MAX;
+        return issuedAt.plusSeconds(this.expiresIn);
     }
 
     /**

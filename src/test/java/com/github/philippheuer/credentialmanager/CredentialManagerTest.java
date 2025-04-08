@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
@@ -24,7 +26,7 @@ public class CredentialManagerTest {
         CredentialManager credentialManager = CredentialManagerBuilder.builder().build();
 
         // asserts
-        assertTrue(credentialManager.getStorageBackend() != null, "Storage Backend not registered!");
+        assertNotNull(credentialManager.getStorageBackend(), "Storage Backend not registered!");
     }
 
     /**
@@ -42,7 +44,7 @@ public class CredentialManagerTest {
         credentialManager.addCredential("default", credential);
 
         // asserts
-        assertTrue(credentialManager.getCredentials().size() == 1, "Credential wasn't added!");
+        assertEquals(1, credentialManager.getCredentials().size(), "Credential wasn't added!");
     }
 
 }

@@ -3,6 +3,7 @@ package com.github.philippheuer.credentialmanager.identityprovider;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.philippheuer.credentialmanager.util.TokenResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.philippheuer.credentialmanager.domain.Credential;
 import com.github.philippheuer.credentialmanager.domain.DeviceAuthorization;
@@ -23,6 +24,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 
+import java.io.IOException;
 import java.net.Proxy;
 import java.net.URLEncoder;
 import java.time.Instant;
@@ -79,7 +81,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     /**
      * Scope Separator
      */
-    protected String scopeSeperator = " ";
+    protected String scopeSeparator = " ";
 
     /**
      * Response Type
@@ -185,7 +187,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         if (state == null) {
             state = this.providerName + "|" + UUID.randomUUID();
         }
-        return String.format("%s?response_type=%s&client_id=%s&redirect_uri=%s&scope=%s&state=%s", authUrl, URLEncoder.encode(responseType, "UTF-8"), URLEncoder.encode(clientId, "UTF-8"), URLEncoder.encode(redirectUrl, "UTF-8"), String.join(scopeSeperator, scopes.stream().map(s -> s.toString()).collect(Collectors.toList())), URLEncoder.encode(state, "UTF-8"));
+        return String.format("%s?response_type=%s&client_id=%s&redirect_uri=%s&scope=%s&state=%s", authUrl, URLEncoder.encode(responseType, "UTF-8"), URLEncoder.encode(clientId, "UTF-8"), URLEncoder.encode(redirectUrl, "UTF-8"), String.join(scopeSeparator, scopes.stream().map(s -> s.toString()).collect(Collectors.toList())), URLEncoder.encode(state, "UTF-8"));
     }
 
     /**
@@ -310,8 +312,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
             String responseBody = response.body().string();
             if (response.isSuccessful()) {
                 Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
-
-                return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
+                return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, TokenResponseUtil.parseExpiresIn(resultMap.get("expires_in")), null);
             } else {
                 throw new ContextedRuntimeException("getCredentialByCode request failed!")
                         .addContextValue("requestUrl", request.url())
@@ -354,8 +355,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
                 String responseBody = response.body().string();
                 if (response.isSuccessful()) {
                     Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
-
-                    return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
+                    return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, TokenResponseUtil.parseExpiresIn(resultMap.get("expires_in")), null);
                 } else {
                     throw new ContextedRuntimeException("get credential request failed!")
                             .addContextValue("requestUrl", request.url())
@@ -373,13 +373,36 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
 
     /**
      * Refresh access token using refresh token
+     * <p>
+     * This method will not throw an exception if the refresh fails, but will log a warning and return an empty Optional.
+     *
+     * @param oldCredential The credential to refresh
+     * @return The refreshed credential, or empty if the refresh failed
+     */
+    public Optional<OAuth2Credential> refreshCredential(OAuth2Credential oldCredential) {
+        try {
+            return Optional.of(refreshCredentialOrThrow(oldCredential));
+        } catch (Exception ex) {
+            log.warn("refreshCredential request failed!", ex);
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Refresh access token using refresh token
      *
      * @param oldCredential The credential to refresh
      * @return The refreshed credential
      * @throws UnsupportedOperationException If the token endpoint type is not "QUERY" or "BODY", or if the credential has no refresh token.
+     * @throws IllegalArgumentException If response attributes are of an unexpected type
      * @throws RuntimeException If the response is unsuccessful
+     * @throws IOException If the request could not be executed
      */
-    public Optional<OAuth2Credential> refreshCredential(OAuth2Credential oldCredential) {
+    public OAuth2Credential refreshCredentialOrThrow(OAuth2Credential oldCredential) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException, IOException {
+        if (oldCredential.getRefreshToken() == null)
+            throw new UnsupportedOperationException("Attempting to refresh a credential that has no refresh token.");
+
         Map<String, String> parameters = new HashMap<>();
         parameters.put("client_id", this.clientId);
         parameters.put("grant_type", "refresh_token");
@@ -389,25 +412,16 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
             parameters.put("client_secret", this.clientSecret);
         }
 
-        try {
-            if (oldCredential.getRefreshToken() == null)
-                throw new UnsupportedOperationException("Attempting to refresh a credential that has no refresh token.");
-
-            Request request = getTokenRequest(parameters, Collections.emptyMap());
-            try (Response response = httpClient.newCall(request).execute()) {
-                String responseBody = response.body().string();
-                if (response.isSuccessful()) {
-                    Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
-
-                    OAuth2Credential credential = new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
-                    return Optional.of(credential);
-                } else {
-                    throw new RuntimeException("refreshCredential request failed! " + response.code() + ": " + responseBody);
-                }
+        Request request = getTokenRequest(parameters, Collections.emptyMap());
+        try (Response response = httpClient.newCall(request).execute()) {
+            String responseBody = response.body().string();
+            if (response.isSuccessful()) {
+                Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
+                return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, TokenResponseUtil.parseExpiresIn(resultMap.get("expires_in")), null);
+            } else {
+                throw new RuntimeException("refreshCredential request failed! " + response.code() + ": " + responseBody);
             }
-        } catch (Exception ignored) {}
-
-        return Optional.empty();
+        }
     }
 
     /**
@@ -444,8 +458,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
                 String responseBody = response.body().string();
                 if (response.isSuccessful()) {
                     Map<String, Object> resultMap = OBJECTMAPPER.readValue(responseBody, new TypeReference<HashMap<String, Object>>() {});
-
-                    return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, (Integer) resultMap.get("expires_in"), null);
+                    return new OAuth2Credential(this.providerName, (String) resultMap.get("access_token"), (String) resultMap.get("refresh_token"), null, null, TokenResponseUtil.parseExpiresIn(resultMap.get("expires_in")), null);
                 } else {
                     throw new RuntimeException("getCredentialByClientCredentials request failed! " + response.code() + ": " + responseBody);
                 }
@@ -499,9 +512,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     public boolean isValid(Credential credential) {
         if (credential instanceof OAuth2Credential) {
             OAuth2Credential oauthCred = (OAuth2Credential) credential;
-            if (oauthCred.getIssuedAt() != null && oauthCred.getExpiresIn() != null) {
-                return oauthCred.getIssuedAt().plusSeconds(oauthCred.getExpiresIn()).compareTo(Instant.now()) > 0;
-            }
+            return !oauthCred.isExpired();
         }
 
         return false;
