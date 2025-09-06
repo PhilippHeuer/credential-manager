@@ -54,7 +54,7 @@ dependencies {
     testImplementation("org.slf4j:slf4j-simple:2.0.17")
 
     // annotations
-    implementation("org.jetbrains:annotations:26.0.2")
+    implementation("org.jetbrains:annotations:26.0.2-1")
 
     // Commons Lang
     implementation("org.apache.commons:commons-lang3:3.18.0")
