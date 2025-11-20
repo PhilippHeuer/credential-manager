@@ -60,6 +60,6 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.20.0")
 
     // HTTP Client
-    implementation("com.squareup.okhttp3:okhttp:5.3.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.0")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
 }
