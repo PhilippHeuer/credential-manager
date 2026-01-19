@@ -45,7 +45,7 @@ projectConfiguration {
 
 dependencies {
     // Jackson (JSON)
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.20.1"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.0"))
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
