@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * The CredentialManager
@@ -49,19 +48,28 @@ public class CredentialManager {
      */
     private List<Credential> credentials;
 
+    CredentialManager(IStorageBackend storageBackend, AuthenticationController authenticationController, Collection<IdentityProvider> identityProviders) {
+        this.storageBackend = storageBackend;
+        this.authenticationController = authenticationController;
+        authenticationController.setCredentialManager(this);
+
+        // register identity providers
+        identityProviders.forEach(this::registerIdentityProvider);
+
+        // load credentials
+        this.load();
+    }
+
     /**
      * Creates a new CredentialManager
      *
      * @param storageBackend           The Storage Backend
      * @param authenticationController Authentication Controller
+     * @deprecated in favor of {@link CredentialManagerBuilder#build()}
      */
+    @Deprecated
     public CredentialManager(IStorageBackend storageBackend, AuthenticationController authenticationController) {
-        this.storageBackend = storageBackend;
-        this.authenticationController = authenticationController;
-        authenticationController.setCredentialManager(this);
-
-        // load credentials
-        this.load();
+        this(storageBackend, authenticationController, Collections.emptyList());
     }
 
     /**
@@ -158,6 +166,7 @@ public class CredentialManager {
         }
 
         this.credentials.add(credential);
+        this.authenticationController.registerCredential(credential);
     }
 
     /**
@@ -186,6 +195,7 @@ public class CredentialManager {
     @Synchronized
     public void load() {
         this.credentials = storageBackend.loadCredentials();
+        this.credentials.forEach(authenticationController::registerCredential);
     }
 
     /**
