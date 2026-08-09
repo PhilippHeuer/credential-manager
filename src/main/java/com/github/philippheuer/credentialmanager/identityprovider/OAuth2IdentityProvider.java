@@ -27,7 +27,6 @@ import org.apache.commons.lang3.exception.ContextedRuntimeException;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URLEncoder;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -206,8 +205,9 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         FormBody.Builder requestBody = new FormBody.Builder();
         requestBody.add("client_id", this.clientId);
         if (scopes != null && !scopes.isEmpty()) {
-            requestBody.add("scope",
-                    scopes.stream().map(Object::toString).collect(Collectors.joining(" ")));
+            String joinedScopes = scopes.stream().map(Object::toString).collect(Collectors.joining(" "));
+            requestBody.add("scope", joinedScopes); // RFC compliant
+            requestBody.add("scopes", joinedScopes); // Twitch deviates from the RFC
         }
         Request request = new Request.Builder()
                 .url(this.deviceUrl)
