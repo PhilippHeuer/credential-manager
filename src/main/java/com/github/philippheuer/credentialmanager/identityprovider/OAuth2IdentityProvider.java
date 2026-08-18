@@ -93,6 +93,15 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
     protected String tokenEndpointPostType = "QUERY";
 
     /**
+     * Device flow: The name of the form parameter that contains the requested token scopes.
+     * <p>
+     * The default value is RFC compliant, but can be adjusted for non-standard endpoints.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628#section-3.1">RFC 8628 Section 3.1</a>
+     */
+    protected String deviceFlowScopeParamName = "scope";
+
+    /**
      * Constructor
      *
      * @param providerName Provider Name
@@ -205,9 +214,8 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         FormBody.Builder requestBody = new FormBody.Builder();
         requestBody.add("client_id", this.clientId);
         if (scopes != null && !scopes.isEmpty()) {
-            String joinedScopes = scopes.stream().map(Object::toString).collect(Collectors.joining(" "));
-            requestBody.add("scope", joinedScopes); // RFC compliant
-            requestBody.add("scopes", joinedScopes); // Twitch deviates from the RFC
+            requestBody.add(this.deviceFlowScopeParamName,
+                    scopes.stream().map(Object::toString).collect(Collectors.joining(" ")));
         }
         Request request = new Request.Builder()
                 .url(this.deviceUrl)
