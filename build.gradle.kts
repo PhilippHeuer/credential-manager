@@ -61,5 +61,5 @@ dependencies {
 
     // HTTP Client
     implementation("com.squareup.okhttp3:okhttp:5.5.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.4.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.5.0")
 }
