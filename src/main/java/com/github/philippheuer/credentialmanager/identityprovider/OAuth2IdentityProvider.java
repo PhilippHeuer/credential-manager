@@ -27,7 +27,6 @@ import org.apache.commons.lang3.exception.ContextedRuntimeException;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URLEncoder;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -92,6 +91,15 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
      * Token Endpoint Post Type: QUERY or BODY
      */
     protected String tokenEndpointPostType = "QUERY";
+
+    /**
+     * Device flow: The name of the form parameter that contains the requested token scopes.
+     * <p>
+     * The default value is RFC compliant, but can be adjusted for non-standard endpoints.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628#section-3.1">RFC 8628 Section 3.1</a>
+     */
+    protected String deviceFlowScopeParamName = "scope";
 
     /**
      * Constructor
@@ -206,7 +214,7 @@ public abstract class OAuth2IdentityProvider extends IdentityProvider {
         FormBody.Builder requestBody = new FormBody.Builder();
         requestBody.add("client_id", this.clientId);
         if (scopes != null && !scopes.isEmpty()) {
-            requestBody.add("scope",
+            requestBody.add(this.deviceFlowScopeParamName,
                     scopes.stream().map(Object::toString).collect(Collectors.joining(" ")));
         }
         Request request = new Request.Builder()
