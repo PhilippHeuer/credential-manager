@@ -50,8 +50,8 @@ dependencies {
     api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     // Logging
-    api("org.slf4j:slf4j-api:2.0.18")
-    testImplementation("org.slf4j:slf4j-simple:2.0.18")
+    api("org.slf4j:slf4j-api:2.0.20")
+    testImplementation("org.slf4j:slf4j-simple:2.0.20")
 
     // annotations
     implementation("org.jetbrains:annotations:26.1.0")
