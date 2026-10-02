@@ -57,7 +57,7 @@ dependencies {
     implementation("org.jetbrains:annotations:26.1.0")
 
     // Commons Lang
-    implementation("org.apache.commons:commons-lang3:3.20.0")
+    implementation("org.apache.commons:commons-lang3:3.21.0")
 
     // HTTP Client
     implementation("com.squareup.okhttp3:okhttp:5.5.0")
